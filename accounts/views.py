@@ -55,7 +55,7 @@ def register(request):
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[to_email]
             )
-            send_email.content_subtype = 'html'  # ✅ Send as HTML
+             
             send_email.send()
             # messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address [rathan.kumar@gmail.com]. Please verify it.')
             return redirect('/accounts/login/?command=verification&email='+email)
@@ -191,7 +191,7 @@ def forgotPassword(request):
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[to_email]
             )
-            send_email.content_subtype = 'html'  # ✅ Send as HTML
+            
             send_email.send()
 
             messages.success(request, 'Password reset email has been sent to your email address.')
