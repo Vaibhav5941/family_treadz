@@ -15,7 +15,9 @@ requests==2.31.0
 djangorestframework==3.14.0
 django-filter==23.5
 django-cors-headers==4.3.1
+django-admin-thumbnails
 
 # यह है! बाकी सब निकालो!
+
 
 
