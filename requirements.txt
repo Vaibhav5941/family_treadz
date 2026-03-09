@@ -1,6 +1,6 @@
-# DELETE सब कुछ
-# Replace with यह:
 
+cloudinary
+django-cloudinary-storage
 Django==5.0.1
 python-decouple==3.8
 Pillow==10.3.0
@@ -17,7 +17,8 @@ django-filter==23.5
 django-cors-headers==4.3.1
 django-admin-thumbnails
 xhtml2pdf==0.2.15
-# यह है! बाकी सब निकालो!
+
+
 
 
 
