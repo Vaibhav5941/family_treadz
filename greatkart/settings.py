@@ -179,19 +179,47 @@ MESSAGE_TAGS = {
 }
 
 # ==================== EMAIL CONFIGURATION ====================
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
-EMAIL_USE_SSL = False
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
-print(f"✅ Email Backend: {EMAIL_BACKEND}")
-print(f"✅ Email Host: {EMAIL_HOST}")
-print(f"✅ Email Port: {EMAIL_PORT}")
-print(f"✅ Email User: {EMAIL_HOST_USER if EMAIL_HOST_USER else '(NOT SET - Check Render Environment)'}")
-print(f"✅ Email TLS: {EMAIL_USE_TLS}")
+print("\n" + "="*70)
+print("📧 EMAIL CONFIGURATION")
+print("="*70)
+
+if DEBUG:
+    # Local Development - Console Backend
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'noreply@localhost'
+    print("✅ Environment: LOCAL (Console Backend)")
+    print("   Emails will print to console")
+else:
+    # Production (Render) - SMTP Backend
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    print("✅ Environment: PRODUCTION (Render)")
+    
+    # Get email configuration from environment variables
+    EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+    EMAIL_PORT = config('EMAIL_PORT', default='587', cast=int)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default='True', cast=bool)
+    EMAIL_USE_SSL = False
+    DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@greatkart.com')
+    
+    # Display configuration
+    print(f"✅ EMAIL_BACKEND: {EMAIL_BACKEND}")
+    print(f"✅ EMAIL_HOST: {EMAIL_HOST}")
+    print(f"✅ EMAIL_PORT: {EMAIL_PORT}")
+    print(f"✅ EMAIL_HOST_USER: {EMAIL_HOST_USER if EMAIL_HOST_USER else '❌ NOT SET'}")
+    print(f"✅ EMAIL_USE_TLS: {EMAIL_USE_TLS}")
+    print(f"✅ DEFAULT_FROM_EMAIL: {DEFAULT_FROM_EMAIL}")
+    
+    # Validate configuration
+    if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+        print("\n⚠️  WARNING: Email credentials incomplete!")
+        if not EMAIL_HOST_USER:
+            print("   ❌ EMAIL_HOST_USER not set in environment variables")
+        if not EMAIL_HOST_PASSWORD:
+            print("   ❌ EMAIL_HOST_PASSWORD not set in environment variables")
+
+print("="*70 + "\n")
 # ==============================================================
 
 # ==================== STRIPE CONFIGURATION ====================
