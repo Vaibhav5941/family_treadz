@@ -186,6 +186,11 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@greatkart.com')
+print(f"✅ Email Backend: {EMAIL_BACKEND}")
+print(f"✅ Email Host: {EMAIL_HOST}")
+print(f"✅ Email Port: {EMAIL_PORT}")
+print(f"✅ Email User: {EMAIL_HOST_USER if EMAIL_HOST_USER else '(NOT SET - Check Render Environment)'}")
+print(f"✅ Email TLS: {EMAIL_USE_TLS}")
 # ==============================================================
 
 # ==================== STRIPE CONFIGURATION ====================
