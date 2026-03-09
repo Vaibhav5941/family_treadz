@@ -1,64 +1,109 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
 
-<section class="section-content padding-y">
+<section class="section-content pt-2 pb-5">
+  <div class="register-wrapper">
+    <div class="login-card">
 
-<!-- ============================ COMPONENT REGISTER   ================================= -->
-	<div class="card mx-auto" style="max-width:520px; margin-top:40px;">
+      <!-- Accent bar -->
+      <div class="login-card-accent"></div>
+
       <article class="card-body">
-    {% include 'includes/alerts.html' %}
-		<header class="mb-4"><h4 class="card-title">Sign up</h4></header>
-		<form action="{% url 'register' %}" method="POST">
-      {% csrf_token %}
 
+        <!-- Header -->
+        <div class="register-card-header">
+          <div class="register-card-icon">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <header>
+            <h4 class="card-title">Create Account</h4>
+            <p class="register-card-subtitle">Join Family Trendz — it's free!</p>
+          </header>
+        </div>
 
-				<div class="form-row">
-					<div class="col form-group">
-						<label>First name</label>
-					  	{{ form.first_name }}
-					</div> <!-- form-group end.// -->
-					<div class="col form-group">
-						<label>Last name</label>
-					  	{{ form.last_name }}
-					</div> <!-- form-group end.// -->
-				</div> <!-- form-row end.// -->
+        {% include 'includes/alerts.html' %}
 
+        <form action="{% url 'register' %}" method="POST">
+          {% csrf_token %}
 
-				<div class="form-row">
-					<div class="form-group col-md-6">
-					  <label>Email Address</label>
-					  {{form.email}}
-					</div> <!-- form-group end.// -->
-					<div class="form-group col-md-6">
-					  <label>Phone Number</label>
-					  {{form.phone_number}}
-					</div> <!-- form-group end.// -->
-				</div> <!-- form-row.// -->
-				<div class="form-row">
-					<div class="form-group col-md-6">
-						<label>Create password</label>
-					    {{ form.password }}
-					</div> <!-- form-group end.// -->
-					<div class="form-group col-md-6">
-						<label>Repeat password</label>
-            {{form.confirm_password}}
-					</div> <!-- form-group end.// -->
-				</div>
-			    <div class="form-group">
-			        <button type="submit" class="btn btn-primary btn-block"> Register  </button>
-			    </div> <!-- form-group// -->
-      {{ form.email.errors }}
-      {{ form.non_field_errors }}
-			</form>
-		</article><!-- card-body.// -->
-    </div> <!-- card .// -->
-    <p class="text-center mt-4">Have an account? <a href="{% url 'login' %}">Log In</a></p>
-    <br><br>
-<!-- ============================ COMPONENT REGISTER  END.// ================================= -->
+          <!-- Personal Info -->
+          <div class="form-section-label">Personal Info</div>
 
+          <div class="form-row">
+            <div class="col form-group">
+              <label>First Name</label>
+              {{ form.first_name }}
+            </div>
+            <div class="col form-group">
+              <label>Last Name</label>
+              {{ form.last_name }}
+            </div>
+          </div>
 
+          <!-- Contact Info -->
+          <div class="form-section-label">Contact Details</div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Email Address</label>
+              {{ form.email }}
+            </div>
+            <div class="form-group col-md-6">
+              <label>Phone Number</label>
+              {{ form.phone_number }}
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-section-label">Security</div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Create Password</label>
+              {{ form.password }}
+              <p class="password-hint">
+                <i class="fas fa-shield-alt"></i>
+                Use 8+ characters
+              </p>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Repeat Password</label>
+              {{ form.confirm_password }}
+            </div>
+          </div>
+
+          <!-- Errors -->
+          {{ form.email.errors }}
+          {{ form.non_field_errors }}
+
+          <!-- Submit -->
+          <div class="form-group" style="margin-bottom: 0; margin-top: 8px;">
+            <button type="submit" class="btn-register">
+              <i class="fas fa-check-circle" style="margin-right: 6px;"></i>
+              Create My Account
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Terms -->
+        <p class="terms-note">
+          By registering, you agree to our
+          <a href="#">Terms of Service</a> &amp;
+          <a href="#">Privacy Policy</a>
+        </p>
+        <p class="login-link-text">
+      Already have an account? <a href="{% url 'login' %}">Sign in →</a>
+    </p>
+
+      </article><!-- /card-body -->
+    </div><!-- /login-card -->
+
+    <!-- Login link -->
+    
+
+  </div><!-- /register-wrapper -->
 </section>
 
 {% endblock %}

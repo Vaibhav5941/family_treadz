@@ -9,43 +9,127 @@
 
 <!-- ========================= SECTION MAIN ========================= -->
 <section class="section-intro padding-y-sm">
-<div class="container">
+  <div class="container-fluid">
+    <div class="intro-banner-wrap">
+ 
+      <div id="carouselExampleRide"
+           class="carousel slide"
+           data-bs-ride="carousel"
+           data-bs-interval="3500">
 
-<div class="intro-banner-wrap">
-	<img src="{% static 'images/banners/cover.jpg' %}" class="img-fluid rounded">
-</div>
+        <div class="carousel-inner">
 
-</div> <!-- container //  -->
+          {% for banner in banners %}
+          <div class="carousel-item {% if forloop.first %}active{% endif %}">
+
+            {% if banner.category %}
+              <a href="{{ banner.category.get_url }}">
+                <img src="{{ banner.image.url }}"
+                     class="d-block w-100 rounded"
+                     alt="{{ banner.title }}">
+              </a>
+            {% else %}
+              <img src="{{ banner.image.url }}"
+                   class="d-block w-100 rounded"
+                   alt="{{ banner.title }}">
+            {% endif %}
+
+          </div>
+          {% endfor %}
+
+        </div>
+
+        <!-- PREV BUTTON -->
+        <button class="carousel-control-prev"
+                type="button"
+                data-bs-target="#carouselExampleRide"
+                data-bs-slide="prev"
+                style="
+                  width:32px;height:32px;background:transparent;
+                  border:none;border-radius:50%;
+                  top:50%;left:10px;
+                  transform:translateY(-50%);
+                  position:absolute;opacity:0.35;">
+          <span class="carousel-control-prev-icon"
+                style="width:18px;height:18px;filter:invert(1);"></span>
+        </button>
+
+        <!-- NEXT BUTTON -->
+        <button class="carousel-control-next"
+                type="button"
+                data-bs-target="#carouselExampleRide"
+                data-bs-slide="next"
+                style="
+                  width:32px;height:32px;background:transparent;
+                  border:none;border-radius:50%;
+                  top:50%;right:10px;
+                  transform:translateY(-50%);
+                  position:absolute;opacity:0.35;">
+          <span class="carousel-control-next-icon"
+                style="width:18px;height:18px;filter:invert(1);"></span>
+        </button>
+
+      </div>
+    </div>
+  </div>
 </section>
 <!-- ========================= SECTION MAIN END// ========================= -->
 
 <!-- ========================= SECTION  ========================= -->
-<section class="section-name padding-y-sm">
+<section class="section-name padding-sm">
 <div class="container">
 
-<header class="section-heading">
-	<a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
-	<h3 class="section-title">Popular products</h3>
-</header><!-- sect-heading -->
+<header class="section-heading fs-6 fs-sm-5 fs-md-4 fs-lg-3" style="display: flex; align-items: center; justify-content: space-between ;margin-bottom:8px;">
 
+  <h3 class="section-title" style="font-size:1.6rem !important">Popular Products</h3>
 
+  <a href="{% url 'store' %}" style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.10em; text-transform: uppercase; color: #C68642; border: 2px solid #C68642; border-radius: 50px; padding: 0.38rem 1.1rem; background: transparent; text-decoration: none; transition: all 0.28s ease; white-space: nowrap;" onmouseover="this.style.background='#C68642'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#C68642';">See All</a>
+</header>
 <div class="row">
 	{% for product in products %}
-	<div class="col-md-3">
-		<div class="card card-product-grid">
-			<a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.images.url }}"> </a>
-			<figcaption class="info-wrap">
-				<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
-				<div class="price mt-1">$ {{ product.price }}</div> <!-- price-wrap.// -->
-				<div class="rating-star">
-					<span>
-						<i class="fa fa-star{% if product.averageReview < 0.5 %}-o{% elif product.averageReview >= 0.5 and product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if product.averageReview < 1.5 %}-o{% elif product.averageReview >= 1.5 and product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if product.averageReview < 2.5 %}-o{% elif product.averageReview >= 2.5 and product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if product.averageReview < 3.5 %}-o{% elif product.averageReview >= 3.5 and product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if product.averageReview < 4.5 %}-o{% elif product.averageReview >= 4.5 and product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
-						</span>
-				</div>
+	<div class="col-6 col-md-3 mb-2">
+		<div class="card card-product-grid" style="margin-bottom:5px;min-height: 300px; display: flex; flex-direction: column; border:0.5px solid #EDEDED">
+			<a href="{{ product.get_url }}" class="img-wrap" style="background-color:white;"> <img src="{{ product.images.url }}" class="img-fluid"> </a>
+			<figcaption class="info-wrap" >
+        {% comment %} {% if product.stock > 0 %}
+								<span class="stock-badge badge badge-success ml-2" style="top: 10px;left: 10px;position: absolute;font-size: 10px">In Stock</span>
+							{% else %}
+								<span class="stock-badge badge badge-danger ml-2"style="top: 10px;left: 10px;position: absolute;font-size: 10px">Out of Stock</span>
+							{% endif %} {% endcomment %}
+				<a href="{{ product.get_url }}" class="title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; line-height: 1.2;color: #67717c;">{{ product.product_name }}</a>
+				{% comment %} <div class="price mt-1" style="color: #d9534f;">Rs. {{ product.price }} <span style="color:#635b5b;text-decoration: line-through;font-size:90%;margin-left:2px"> Rs. {{ product.get_price }}</span></div> <!-- price-wrap.// --> {% endcomment %}
+        <div class="product-price">
+    {% if product.offer_price %}
+        <span style="color:#635b5b; text-decoration: line-through; font-size:90%;">
+            ₹{{ product.price }}
+        </span>
+        <span style="color:#e53935; font-weight:600; margin-left:6px;">
+             ₹{{ product.offer_price }}
+        </span>
+         <span style="
+            
+            color:#fff;
+            font-weight:600;
+            font-size:12px;
+            color:#cf7f21;
+            
+            margin-left:2px;">
+            {{ product.discount_percentage }}% OFF
+        </span>
+    {% else %}
+        <span style="color:#e53935; font-weight:600; margin-left:6px;">₹{{ product.price }}</span>
+    {% endif %}
+</div>
+				<div class="rating-star" style="display: flex; align-items: center;margin-top:0px ">
+	<span>
+		<i class="fa fa-star{% if product.averageReview < 0.5 %}-o{% elif product.averageReview >= 0.5 and product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+		<i class="fa fa-star{% if product.averageReview < 1.5 %}-o{% elif product.averageReview >= 1.5 and product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+		<i class="fa fa-star{% if product.averageReview < 2.5 %}-o{% elif product.averageReview >= 2.5 and product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+		<i class="fa fa-star{% if product.averageReview < 3.5 %}-o{% elif product.averageReview >= 3.5 and product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+		<i class="fa fa-star{% if product.averageReview < 4.5 %}-o{% elif product.averageReview >= 4.5 and product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+	</span>
+	<span style="font-size: 12px; padding: 2px 6px; border-radius: 4px; color: #fff; {% if product.averageReview < 2 %}background-color: #dc3545;{% elif product.averageReview >= 2 and product.averageReview <= 3.5 %}background-color: #ffc107; color: #000;{% else %}background-color: #28a745;{% endif %}">{{ product.averageReview }}/5</span>
+</div>
 			</figcaption>
 		</div>
 	</div> <!-- col.// -->
@@ -55,11 +139,6 @@
 </div><!-- container // -->
 </section>
 <!-- ========================= SECTION  END// ========================= -->
-
-
-
-
-
 
 </body>
 </html>

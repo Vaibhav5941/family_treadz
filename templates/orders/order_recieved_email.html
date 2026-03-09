@@ -1,9 +1,238 @@
-{% autoescape off %}
-
-Hi {{user.first_name}},
-
-YOUR ORDER HAS BEEN RECIEVED
-
-Order Number: {{order.order_number}}
-
-{% endautoescape %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            padding: 10px;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .email-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+        }
+        
+        .email-header h1 {
+            font-size: clamp(24px, 5vw, 28px);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .email-header p { font-size: 14px; opacity: 0.95; }
+        
+        .email-body {
+            padding: 30px 20px;
+            color: #333;
+        }
+        
+        .greeting { font-size: clamp(16px, 4vw, 18px); margin-bottom: 20px; }
+        
+        .intro-text {
+            text-align: center;
+            font-size: 15px;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        
+        .order-info-box, .next-steps {
+            background: #f8f9fa;
+            border-left: 4px solid #4CAF50;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        
+        .next-steps { background: #fffbf0; border-left-color: #FFA726; }
+        
+        .order-info-box h2, .next-steps h3 {
+            font-size: 16px;
+            color: #4CAF50;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+        
+        .next-steps h3 { color: #FF6F00; }
+        
+        .order-detail {
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .order-detail { grid-template-columns: 1fr; }
+        }
+        
+        .order-detail strong { color: #555; }
+        .highlight { color: #4CAF50; font-weight: 600; }
+        
+        .info-banner {
+            text-align: center;
+            font-size: 14px;
+            color: #1565c0;
+            background: #f0f9ff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+            border-left: 4px solid #2196F3;
+            line-height: 1.6;
+        }
+        
+        .button-container { text-align: center; margin: 25px 0; }
+        
+        .download-btn {
+            display: inline-block;
+            background: #4CAF50;
+            color: white !important;
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3);
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .download-btn:hover { background: #45a049; }
+        
+        @media (max-width: 480px) {
+            .download-btn { width: 100%; padding: 12px 20px; font-size: 14px; }
+        }
+        
+        .divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
+        
+        .next-steps ul {
+            margin: 10px 0;
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .next-steps li { margin: 8px 0; color: #555; font-size: 14px; }
+        
+        .contact-text {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+        }
+        
+        .contact-text a { color: #4CAF50; text-decoration: none; font-weight: 600; }
+        
+        .email-footer {
+            background: #f8f9fa;
+            padding: 25px 20px;
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .email-footer p { margin: 8px 0; }
+        .footer-brand { font-weight: 600; color: #333; font-size: 15px; }
+        .footer-tagline { color: #999; font-size: 12px; }
+        .footer-legal { font-size: 11px; color: #999; margin-top: 15px; line-height: 1.6; }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .email-container { box-shadow: none; border-radius: 0; margin: 0; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>✓ Order Confirmed!</h1>
+            <p>Thank you for shopping with Family Trendz</p>
+        </div>
+        
+        <div class="email-body">
+            <div class="greeting">Hi <strong>{{user.first_name}}</strong>,</div>
+            
+            <p class="intro-text">
+                Great news! We've received your order and payment successfully.<br>
+                Your items are being prepared for shipment.
+            </p>
+            
+            <div class="order-info-box">
+                <h2>📦 Your Order Details</h2>
+                <div class="order-detail">
+                    <strong>Order Number:</strong> 
+                    <span class="highlight">#{{order.order_number}}</span>
+                </div>
+                <div class="order-detail">
+                    <strong>Order Date:</strong> 
+                    <span>{{order.created_at|date:"d F Y"}}</span>
+                </div>
+                <div class="order-detail">
+                    <strong>Order Time:</strong> 
+                    <span>{{order.created_at|date:"h:i A"}} IST</span>
+                </div>
+                <div class="order-detail">
+                    <strong>Total Amount:</strong> 
+                    <span class="highlight" style="font-size: 16px;">₹{{order.order_total}}</span>
+                </div>
+                <div class="order-detail">
+                    <strong>Payment Status:</strong> 
+                    <span class="highlight">✓ Completed</span>
+                </div>
+            </div>
+            
+            <div class="info-banner">
+                💡 <strong>Download your invoice below</strong> for your records and warranty purposes.
+            </div>
+            
+            <div class="button-container">
+                <a href="http://127.0.0.1:8000/orders/download-invoice/{{order.id}}/" class="download-btn">
+                    📄 Download Invoice PDF
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="next-steps">
+                <h3>📋 What Happens Next?</h3>
+                <ul>
+                    <li>We'll prepare your order for shipping</li>
+                    <li>You'll receive a shipping confirmation email with tracking details</li>
+                    <li>Track your order anytime from your dashboard</li>
+                    <li>Expected delivery: 5-7 business days</li>
+                </ul>
+            </div>
+            
+            <p class="contact-text">
+                Need help? Contact us at <a href="mailto:support@familytrendz.com">support@familytrendz.com</a>
+            </p>
+        </div>
+        
+        <div class="email-footer">
+            <p class="footer-brand">Family Trendz</p>
+            <p class="footer-tagline">Your Fashion, Your Style</p>
+            <div class="divider"></div>
+            <p>📧 support@familytrendz.com | 📞 +91 XXXXX XXXXX</p>
+            <p class="footer-legal">
+                You're receiving this email because you placed an order on Family Trendz.<br>
+                © 2026 Family Trendz. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

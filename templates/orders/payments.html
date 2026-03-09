@@ -8,113 +8,238 @@
 	<div class="container">
 
 		<!-- ============================ COMPONENT 1 ================================= -->
-		<h4 class="text-center mb-20">Review Your Order and Make Payment</h4>
-		<div class="row">
+		<div class="payment-header text-center mb-2" style="min-height: 50px;">
+    <h2 class="mb-2" style="line-height: 1.3;">Review Your Order</h2>
+    <p class="text-muted" style="min-height: 24px; line-height: 1.5;">Please review your order details before making payment</p>
+            
+            <!-- Progress Steps -->
+            <div class="checkout-steps d-none d-md-flex justify-content-center mt-4" style="min-height: 80px;">
+        <div class="step completed" style="width: 100px;">
+            <span class="step-number" style="width: 45px; height: 45px;"><i class="fa fa-check" style="width: 16px; display: inline-block;"></i></span>
+            <span class="step-label" style="min-height: 20px; display: block;">Shipping</span>
+        </div>
+        <div class="step-line completed" style="min-width: 80px; height: 3px; margin-top: 22px;"></div>
+        <div class="step active" style="width: 100px;">
+            <span class="step-number" style="width: 45px; height: 45px; font-size: 1.1rem;">2</span>
+            <span class="step-label" style="min-height: 20px; display: block;">Payment</span>
+        </div>
+        <div class="step-line" style="min-width: 80px; height: 3px; margin-top: 22px;"></div>
+        <div class="step" style="width: 100px;">
+            <span class="step-number" style="width: 45px; height: 45px; font-size: 1.1rem;">3</span>
+            <span class="step-label" style="min-height: 20px; display: block;">Confirmation</span>
+        </div>
+    </div>
+</div>
 
-			<aside class="col-lg-8">
-				<div class="card">
-					<h5 class="card-header">Billing Address</h5>
-					<div class="card-body">
-						<p class="card-text mb-0">{{order.full_name}}</p>
-						<p class="card-text mb-0">{{order.full_address}}</p>
-						<p class="card-text mb-0">{{order.city}}, {{order.state}}</p>
-						<p class="card-text mb-0">{{order.country}}</p>
-						<p class="card-text mb-0">{{order.email}}</p>
-						<p class="card-text mb-0">{{order.phone}}</p>
-						{% if order.order_note %}
-						<b>Order Note: </b> {{order.order_note}}
-						{% endif %}
+		 <div class="row">
+            <!-- Left Column - Order Details -->
+           <div class="col-lg-8 mb-4" style="min-height: 400px;">
+    
+    <!-- Billing Address Card -->
+    <div class="card shadow-sm mb-4" style="min-height: 280px;">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center" style="height: 65px;">
+            <h5 class="mb-0" style="line-height: 1.2;">
+                <i class="fa fa-home mr-2 text-primary" style="width: 20px; display: inline-block;"></i>
+                Shipping Address
+            </h5>
+            <a href="{% url 'checkout' %}" class="btn btn-sm btn-outline-primary" style="height: 32px; min-width: 80px;">
+                <i class="fa fa-edit" style="width: 14px; display: inline-block;"></i> Edit
+            </a>
+        </div>
+        <div class="card-body" style="min-height: 215px;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted d-block mb-1">Full Name</small>
+                                <strong>{{ order.full_name }}</strong>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted d-block mb-1">Phone Number</small>
+                                <strong>{{ order.phone }}</strong>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted d-block mb-1">Email Address</small>
+                                <strong>{{ order.email }}</strong>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted d-block mb-1">Delivery Address</small>
+                                <p class="mb-0">
+                                    <strong>{{ order.full_address }}</strong><br>
+                                    {{ order.city }}, {{ order.state }}<br>
+                                    {{ order.country }}
+                                </p>
+                            </div>
+                            {% if order.order_note %}
+                            <div class="col-12 mt-3">
+                                <div class="alert alert-info mb-0">
+                                    <small class="text-muted d-block mb-1">
+                                        <i class="fa fa-sticky-note mr-1"></i>Order Note
+                                    </small>
+                                    <strong>{{ order.order_note }}</strong>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items Card -->
+<div class="card shadow-sm" style="min-height: 300px;">
+    <div class="card-header bg-light" style="height: 65px;">
+        <h5 class="mb-0" style="line-height: 1.2;">
+            <i class="fa fa-shopping-bag mr-2 text-primary" style="width: 20px; display: inline-block;"></i>
+            Order Items ({{ cart_items|length }})
+        </h5>
+    </div>
+                    <div class="card-body p-0">
+                        <div class="order-items-list">
+                            {% for cart_item in cart_items %}
+                            <div class="order-item-row">
+                                <div class="row align-items-center">
+                                    <!-- Product Image & Details -->
+                                    <div class="col-md-6 col-12 mb-3 mb-md-0">
+                                        <div class="d-flex align-items-start">
+                                            <div class="product-image mr-3" style="flex-shrink: 0;">
+    <img src="{{ cart_item.product.images.url }}" 
+         alt="{{ cart_item.product.product_name }}"
+         class="img-thumbnail"
+         width="80"
+         height="80"
+         style="width: 80px; height: 80px; object-fit: cover; display: block;">
+</div>
+                                            <div class="product-info">
+                                                <a href="{{ cart_item.product.get_url }}" 
+                                                   class="product-title text-dark font-weight-bold d-block mb-1">
+                                                    {{ cart_item.product.product_name }}
+                                                </a>
+                                                {% if cart_item.variations.all %}
+                                                <div class="product-variations">
+                                                    {% for item in cart_item.variations.all %}
+                                                    <small class="text-muted d-block">
+                                                        {{ item.variation_category | capfirst }}: 
+                                                        <strong>{{ item.variation_value | capfirst }}</strong>
+                                                    </small>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quantity -->
+                                    <div class="col-4 col-md-2 text-center">
+                                        <small class="text-muted d-block d-md-none mb-1">Quantity</small>
+                                        <span class="quantity-badge">
+                                            {{ cart_item.quantity }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Unit Price -->
+                                    <div class="col-4 col-md-2 text-center">
+                                        <small class="text-muted d-block d-md-none mb-1">Unit Price</small>
+                                        <div class="unit-price">
+                                            ₹{{ cart_item.product.get_price }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Subtotal -->
+                                    <div class="col-4 col-md-2 text-center text-md-right">
+                                        <small class="text-muted d-block d-md-none mb-1">Subtotal</small>
+                                        <div class="item-subtotal">
+                                            ₹{{ cart_item.sub_total }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column - Payment Summary -->
+            <div class="col-lg-4" style="min-height: 400px;">
+    
+    <!-- Payment Summary Card -->
+    <div class="card shadow-sm mb-4 sticky-summary" style="min-height: 500px;">
+        <div class="card-header bg-light" style="height: 65px;">
+            <h5 class="mb-0" style="line-height: 1.2;">
+                <i class="fa fa-archive mr-2 text-primary" style="width: 20px; display: inline-block;"></i>
+                Order Summary
+            </h5>
+        </div>
+                    <div class="card-body">
+                        
+                        <!-- Price Breakdown -->
+                        <div class="price-summary mb-4" style="min-height: 180px;">
+    <div class="d-flex justify-content-between mb-2" style="min-height: 28px;">
+        <span class="text-muted">Subtotal:</span>
+        <span class="font-weight-bold" style="min-width: 80px; text-align: right;">₹{{ total }}</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2" style="min-height: 28px;">
+        <span class="text-muted">Tax:</span>
+        <span style="min-width: 80px; text-align: right;">₹{{ tax }}</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2" style="min-height: 28px;">
+        <span class="text-muted">Shipping:</span>
+        <span class="text-success font-weight-bold" style="min-width: 80px; text-align: right;">FREE</span>
+    </div>
+    <hr style="margin: 0.75rem 0;">
+    <div class="d-flex justify-content-between mb-3" style="min-height: 32px;">
+        <span class="h6 mb-0">Grand Total:</span>
+        <span class="h5 mb-0 text-primary font-weight-bold" style="min-width: 100px; text-align: right;">
+            ₹{{ grand_total }}
+        </span>
+    </div>
+</div>
+
+                        <!-- Payment Method -->
+                        <div class="payment-method-section mb-4">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fa fa-credit-card mr-2"></i>Payment Methods
+                            </h6>
+							
 
 
-					</div>
-				</div>
-				<div class="card">
-					<h5 class="card-header">Payment Method</h5>
-					<div class="card-body">
-						<p class="card-text">PayPal</p>
-
-					</div>
-				</div>
-				<div class="card">
-					<h5 class="card-header">Review Products</h5>
-					<div class="card-body">
-						<table class="table table-borderless table-shopping-cart">
-							<thead class="text-muted">
-								<tr class="small text-uppercase">
-									<th scope="col">Product</th>
-									<th scope="col" width="120">Quantity</th>
-									<th scope="col" width="120">Price</th>
-
-								</tr>
-							</thead>
-							<tbody>
-
-								{% for cart_item in cart_items %}
-								<tr>
-									<td>
-										<figure class="itemside align-items-center">
-											<div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
-											<figcaption class="info">
-												<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-												<p class="text-muted small">
-													{% if cart_item.variations.all %}
-													{% for item in cart_item.variations.all %}
-													{{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
-													{% endfor %}
-													{% endif %}
-												</p>
-											</figcaption>
-										</figure>
-									</td>
-									<td>
-										<!-- col.// -->
-										<label for="">{{cart_item.quantity}}</label>
-									</td>
-									<td>
-										<div class="price-wrap">
-											<var class="price">$ {{ cart_item.sub_total }}</var>
-											<small class="text-muted"> $ {{ cart_item.product.price }} each </small>
-										</div> <!-- price-wrap .// -->
-									</td>
-
-								</tr>
-								{% endfor %}
-
-							</tbody>
-						</table>
-
-					</div>
-				</div>
-
-			</aside> <!-- col.// -->
-			<aside class="col-lg-4">
-
-				<div class="card">
-					<div class="card-body">
-						<dl class="dlist-align">
-							<dt>Total price:</dt>
-							<dd class="text-right">$ {{total}}</dd>
-						</dl>
-						<dl class="dlist-align">
-							<dt>Tax:</dt>
-							<dd class="text-right"> $ {{tax}}</dd>
-						</dl>
-						<dl class="dlist-align">
-							<dt>Grand Total:</dt>
-							<dd class="text-right text-dark b"><strong>$ {{grand_total}}</strong></dd>
-						</dl>
-						<hr>
-						<p class="text-center mb-3">
-							<img src="{% static './images/misc/payments.png' %}" height="26">
-						</p>
-
-
-						<div id="paypal-button-container">
-							<!-- PayPal Button Will Load -->
-						</div>
+						
+<div class="stripe-payment-section mt-3">
+    <button id="stripe-pay-button" class="btn btn-primary btn-block btn-lg">
+        <i class="fa fa-credit-card mr-2"></i>Pay ₹{{ grand_total }} with Card
+    </button>
+    <div id="card-errors" class="text-danger mt-2" style="display:none;"></div>
+</div>
+						<!-- Payment Options Grid -->
+                            <div class="row mt-3">
+                                <div class="col-6 mb-2">
+                                    <div class="payment-badge">
+                                        <i class="fa fa-qrcode text-primary"></i>
+                                        <span>UPI QR</span>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <div class="payment-badge">
+                                        <i class="fa fa-credit-card text-success"></i>
+                                        <span>Cards</span>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <div class="payment-badge">
+                                        <i class="fa fa-university text-info"></i>
+                                        <span>Net Banking</span>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <div class="payment-badge">
+                                        <i class="fa fa-wallet text-warning"></i>
+                                        <span>Wallets</span>
+                                    </div>
+                                </div>
+                            </div>
+						
 
 					</div> <!-- card-body.// -->
 				</div> <!-- card.// -->
+				
 				<div class="alert alert-danger" role="alert">
 				  <b>Please Note: </b>This is a demo website. Do not try to make real payments.
 				</div>
@@ -129,15 +254,14 @@
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
 
+<script src="https://js.stripe.com/v3/"></script>
 <script>
-
-	function getCookie(name) {
+function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
@@ -147,63 +271,431 @@
     return cookieValue;
 }
 
-	var amount = "{{ grand_total }}"
-	var url = "{% url 'payments' %}"
-	var csrftoken = getCookie('csrftoken');
-	var orderID = "{{order.order_number}}"
-	var payment_method = 'PayPal'
-	var redirect_url = "{% url 'order_complete' %}"
-	// Render the PayPal button into #paypal-button-container
-	paypal.Buttons({
+var csrftoken = getCookie('csrftoken');
+var orderID = "{{ order.order_number }}";
+var stripe = Stripe('{{ STRIPE_PUBLISHABLE_KEY }}');
 
-		style: {
-			color: 'blue',
-			shape: 'rect',
-			label: 'pay',
-			height: 40
-		},
-
-		// Set up the transaction
-		createOrder: function(data, actions) {
-			return actions.order.create({
-				purchase_units: [{
-					amount: {
-						value: amount,
-					}
-				}]
-			});
-		},
-
-		// Finalize the transaction
-		onApprove: function(data, actions) {
-			return actions.order.capture().then(function(details) {
-				// Show a success message to the buyer
-				console.log(details);
-				sendData();
-				function sendData(){
-					fetch(url, {
-						method : "POST",
-						headers: {
-							"Content-type": "application/json",
-							"X-CSRFToken": csrftoken,
-						},
-						body: JSON.stringify({
-							orderID: orderID,
-							transID: details.id,
-							payment_method: payment_method,
-							status: details.status,
-						}),
-					})
-				  .then((response) => response.json())
-				  .then((data) => {
-						window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
-					});
-				}
-			});
-		}
-
-
-	}).render('#paypal-button-container');
+document.getElementById('stripe-pay-button').addEventListener('click', async function(e) {
+    e.preventDefault();
+    
+    this.disabled = true;
+    this.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Redirecting to Stripe...';
+    
+    try {
+        const response = await fetch("{% url 'create_checkout_session' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify({order_number: orderID})
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            alert('Error: ' + data.error);
+            this.disabled = false;
+            this.innerHTML = '<i class="fa fa-credit-card mr-2"></i>Pay ₹{{ grand_total }} with Card';
+            return;
+        }
+        
+        // Redirect to Stripe Checkout
+        const result = await stripe.redirectToCheckout({
+            sessionId: data.sessionId
+        });
+        
+        if (result.error) {
+            alert(result.error.message);
+            this.disabled = false;
+            this.innerHTML = '<i class="fa fa-credit-card mr-2"></i>Pay ₹{{ grand_total }} with Card';
+        }
+        
+    } catch (error) {
+        alert('Error: ' + error.message);
+        this.disabled = false;
+        this.innerHTML = '<i class="fa fa-credit-card mr-2"></i>Pay ₹{{ grand_total }} with Card';
+    }
+});
 </script>
+<style>
+/* General Styles */
 
+.payment-header {
+    contain: layout;
+    min-height: 180px;
+}
+
+.checkout-steps {
+    contain: layout;
+    min-height: 80px;
+}
+
+.step {
+    flex-shrink: 0;
+    width: 100px;
+}
+
+.step-number {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+}
+
+.step-line {
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+/* Card stability */
+.card {
+    contain: layout;
+}
+
+.card-header {
+    height: 65px;
+    flex-shrink: 0;
+}
+
+/* Product image dimensions */
+.product-image img {
+    aspect-ratio: 1 / 1;
+}
+
+/* Price summary stability */
+.price-summary {
+    contain: layout;
+    min-height: 180px;
+}
+
+.price-summary > div {
+    min-height: 28px;
+}
+
+/* PayPal button container */
+#paypal-button-container {
+    min-height: 55px;
+    contain: layout;
+}
+
+/* Payment badges grid */
+.payment-badge {
+    min-height: 85px;
+    contain: layout;
+}
+
+/* Column stability */
+.col-lg-8,
+.col-lg-4 {
+    contain: layout;
+}
+/* Checkout Steps */
+.checkout-steps {
+    align-items: center;
+    gap: 0;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.step-number {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s;
+    font-size: 1.1rem;
+}
+
+.step.completed .step-number {
+    background: #28a745;
+    color: white;
+}
+
+.step.active .step-number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.step-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.step.completed .step-label,
+.step.active .step-label {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.step-line {
+    flex: 1;
+    height: 3px;
+    background: #e9ecef;
+    margin: 0 1rem;
+    align-self: flex-start;
+    margin-top: 22px;
+}
+
+.step-line.completed {
+    background: #28a745;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 2px solid #e9ecef;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-header h5 {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Order Items List */
+.order-items-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.order-item-row {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s;
+}
+
+.order-item-row:last-child {
+    border-bottom: none;
+}
+
+.order-item-row:hover {
+    background-color: #f8f9fa;
+}
+
+.product-image img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+}
+
+.product-title {
+    font-size: 1rem;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.product-title:hover {
+    color: #667eea !important;
+}
+
+.quantity-badge {
+    background: #f8f9fa;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    border: 2px solid #e9ecef;
+    display: inline-block;
+}
+
+.unit-price {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.item-subtotal {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* Payment Summary */
+.sticky-summary {
+    position: sticky;
+    top: 20px;
+}
+
+.price-summary {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+}
+.fa, .fas, .far {
+    display: inline-block;
+    font-display: swap;
+}
+/* Payment Method */
+.payment-option {
+    border: 2px solid #e9ecef;
+    padding: 1rem;
+    border-radius: 8px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.payment-option.selected {
+    border-color: #667eea;
+    background: #f8f9ff;
+}
+
+.payment-option:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.payment-badge {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.payment-badge:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    transform: translateY(-2px);
+}
+
+.payment-badge i {
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.payment-badge span {
+    display: block;
+    color: #495057;
+}
+
+
+
+/* Alert */
+.alert-warning {
+    border: none;
+    border-left: 4px solid #ffc107;
+    border-radius: 8px;
+}
+
+.alert-info {
+    border: none;
+    border-left: 4px solid #17a2b8;
+    background: #d1ecf1;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 991px) {
+    .sticky-summary {
+        position: relative;
+        top: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .section-content {
+        padding: 1rem 0;
+    }
+
+    .payment-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .card-header {
+        padding: 1rem;
+    }
+
+    .order-item-row {
+        padding: 1rem;
+    }
+
+    .product-image img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .product-title {
+        font-size: 0.9rem;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+
+    .step-number {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+
+    .step-label {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .item-subtotal {
+        font-size: 1rem;
+    }
+
+    .quantity-badge {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Loading State */
+.btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.4s ease-out;
+}
+</style>
 {% endblock %}

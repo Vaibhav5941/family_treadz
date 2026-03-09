@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% comment %} {% extends 'base.html' %}
 
 
 {% block content %}
@@ -34,7 +35,7 @@
 				      <th scope="row"><a href="{% url 'order_detail' order.order_number %}">{{order.order_number}}</a></th>
 				      <td>{{order.full_name}}</td>
 				      <td>{{order.phone}}</td>
-				      <td>${{order.order_total}}</td>
+				      <td>₹{{order.order_total}}</td>
 							<td>{{order.created_at}}</td>
 				    </tr>
 				{% endfor %}
@@ -52,6 +53,90 @@
 </div>
 
 
+</section>
+
+{% endblock %} {% endcomment %}
+
+
+
+{% block content %}
+
+<section class="section-conten pt-4 pb-5">
+  {% include 'includes/alerts.html' %}
+  <div class="container">
+    <div class="row">
+
+      {% include 'includes/dashboard_sidebar.html' %}
+
+      <main class="col-md-9 col-sm-12">
+        <article class="dashboard-card">
+
+          <!-- Header -->
+          <div class="dashboard-card-header">
+            <div class="header-icon">
+              <i class="fas fa-shopping-bag"></i>
+            </div>
+            <strong>
+              Order History
+              {% if orders %}
+                <span class="order-count-badge">{{ orders|length }} orders</span>
+              {% endif %}
+            </strong>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive">
+
+              {% if orders %}
+              <table class="orders-table">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Billing Name</th>
+                    <th>Phone</th>
+                    <th>Total</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in orders %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'order_detail' order.order_number %}"
+                         class="order-number-link">
+                        #{{ order.order_number }}
+                      </a>
+                    </td>
+                    <td class="order-name">{{ order.full_name }}</td>
+                    <td class="order-phone">{{ order.phone }}</td>
+                    <td><span class="order-total">₹{{ order.order_total }}</span></td>
+                    <td class="order-date">{{ order.created_at|date:"M d, Y" }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+              {% else %}
+              <!-- Empty State -->
+              <div class="empty-orders">
+                <div class="empty-orders-icon">
+                  <i class="fas fa-shopping-bag"></i>
+                </div>
+                <h6>No Orders Yet</h6>
+                <p>You haven't placed any orders. Start shopping!</p>
+                <a href="{% url 'store' %}" class="btn-shop-now">
+                  Browse Products →
+                </a>
+              </div>
+              {% endif %}
+
+            </div>
+          </div><!-- /card-body -->
+        </article>
+      </main>
+
+    </div>
+  </div>
 </section>
 
 {% endblock %}

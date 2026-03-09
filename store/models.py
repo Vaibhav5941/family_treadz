@@ -11,12 +11,15 @@ class Product(models.Model):
     slug            = models.SlugField(max_length=200, unique=True)
     description     = models.TextField(max_length=500, blank=True)
     price           = models.IntegerField()
+    offer_price     = models.IntegerField(blank=True, null=True) 
     images          = models.ImageField(upload_to='photos/products')
     stock           = models.IntegerField()
     is_available    = models.BooleanField(default=True)
     category        = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_date    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
+    
+    
 
     def get_url(self):
         return reverse('product_detail', args=[self.category.slug, self.slug])
@@ -37,7 +40,17 @@ class Product(models.Model):
         if reviews['count'] is not None:
             count = int(reviews['count'])
         return count
-
+    def get_price(self):
+        return self.offer_price if self.offer_price else self.price
+    
+    def discount_percentage(self):
+     if self.offer_price and self.price:
+        return int(((self.price - self.offer_price) / self.price) * 100)
+     return 0
+    def save_amount(self):
+     if self.offer_price and self.price:
+        return self.price - self.offer_price
+     return 0
 class VariationManager(models.Manager):
     def colors(self):
         return super(VariationManager, self).filter(variation_category='color', is_active=True)

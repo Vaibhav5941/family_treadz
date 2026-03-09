@@ -296,3 +296,43 @@ def order_detail(request, order_id):
         'subtotal': subtotal,
     }
     return render(request, 'accounts/order_detail.html', context)
+
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from io import BytesIO
+
+
+def download_order_invoice(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id, user=request.user, is_ordered=True)
+        order_detail = OrderProduct.objects.filter(order_id=order.id)
+        
+        subtotal = 0
+        for i in order_detail:
+            subtotal += i.product_price * i.quantity
+        
+        context = {
+            'order': order,
+            'order_detail': order_detail,
+            'subtotal': subtotal,
+        }
+        
+        # Render HTML
+        template = get_template('accounts/invoice_pdf_template.html')
+        html = template.render(context)
+        
+        # Generate PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoice_{order.order_number}.pdf"'
+        
+        # Convert HTML to PDF
+        pisa_status = pisa.CreatePDF(html, dest=response)
+        
+        if pisa_status.err:
+            return HttpResponse('Error generating PDF', status=500)
+        
+        return response
+        
+    except Order.DoesNotExist:
+        messages.error(request, 'Order not found')
+        return redirect('dashboard')

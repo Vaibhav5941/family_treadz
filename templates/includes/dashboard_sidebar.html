@@ -1,4 +1,4 @@
-<aside class="col-md-3">
+{% comment %} <aside class="col-md-3">
   <!--   SIDEBAR   -->
   <ul class="list-group">
     <a class="list-group-item {% if '/accounts/' == request.path %}active{% endif %}" href="{% url 'dashboard' %}"> Dashboard </a>
@@ -9,4 +9,225 @@
   <br>
   <a class="btn btn-light btn-block" href="{% url 'logout' %}"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a>
   <!--   SIDEBAR .//END   -->
+</aside> {% endcomment %}
+
+{% comment %} <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+
+/* ── Sidebar Wrapper ── */
+.dashboard-sidebar {
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── Mobile Toggle Button ── */
+.sidebar-toggle-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4A2C17;
+  border: 2px solid #E8D8C4;
+  border-radius: 10px;
+  padding: 0.5rem 1.1rem;
+  background: #FFF8F0;
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  transition: all 0.25s ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #4A2C17;
+  color: #FFF8F0;
+  border-color: #4A2C17;
+}
+
+.sidebar-toggle-btn i {
+  font-size: 1rem;
+}
+
+/* ── Nav List ── */
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: #ffffff;
+  border: 1px solid #E8D8C4;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(74,44,23,0.10);
+}
+
+/* ── Nav Items ── */
+.sidebar-nav .sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #8B7355;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all 0.25s ease;
+  border-bottom: 1px solid #F2E8D9;
+  background: #ffffff;
+}
+
+.sidebar-nav .sidebar-link:last-child {
+  border-bottom: none;
+}
+
+.sidebar-nav .sidebar-link i {
+  width: 18px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #D4A574;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.sidebar-nav .sidebar-link:hover {
+  background: #FAF3E8;
+  color: #2C1A0E;
+  border-left-color: #D4A574;
+  text-decoration: none;
+  padding-left: 22px;
+}
+
+.sidebar-nav .sidebar-link:hover i {
+  color: #C68642;
+}
+
+.sidebar-nav .sidebar-link.active {
+  background: linear-gradient(90deg, #FAF3E8 0%, #FFF8F0 100%);
+  color: #2C1A0E;
+  font-weight: 700;
+  border-left-color: #C68642;
+}
+
+.sidebar-nav .sidebar-link.active i {
+  color: #C68642;
+}
+
+/* ── Active dot indicator ── */
+.sidebar-nav .sidebar-link.active::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: #C68642;
+  border-radius: 50%;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ── Logout Button ── */
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8B7355;
+  background: #FAF3E8;
+  border: 1.5px solid #E8D8C4;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.28s ease;
+  cursor: pointer;
+}
+
+.sidebar-logout i {
+  font-size: 0.85rem;
+  color: #C68642;
+  transition: all 0.25s ease;
+}
+
+.sidebar-logout:hover {
+  background: #2C1A0E;
+  color: #FFF8F0;
+  border-color: #2C1A0E;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(44,26,14,0.20);
+}
+
+.sidebar-logout:hover i {
+  color: #C68642;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sidebar-toggle-btn { display: flex !important; }
+  #sidebarMenu { margin-bottom: 20px; }
+}
+
+@media (min-width: 769px) {
+  .sidebar-toggle-btn { display: none !important; }
+}
+</style> {% endcomment %}
+
+<aside class="col-md-3 col-sm-12 dashboard-sidebar">
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-btn d-md-none"
+          type="button"
+          data-toggle="collapse"
+          data-target="#sidebarMenu"
+          aria-expanded="false"
+          aria-controls="sidebarMenu">
+    <i class="fas fa-bars"></i>
+    Menu
+  </button>
+
+  <!-- Sidebar Nav -->
+  <div id="sidebarMenu" class="collapse d-md-block">
+
+    <ul class="sidebar-nav">
+      <a class="sidebar-link {% if '/accounts/' == request.path %}active{% endif %}"
+         href="{% url 'dashboard' %}">
+        <i class="fas fa-th-large"></i>
+        Dashboard
+      </a>
+      <a class="sidebar-link {% if '/my_orders/' in request.path %}active{% endif %}"
+         href="{% url 'my_orders' %}">
+        <i class="fas fa-shopping-bag"></i>
+        My Orders
+      </a>
+       <a class="sidebar-link {% if '/track_order/' in request.path %}active{% endif %}"
+         href="{% url 'track_order' %}">
+        <i class="fas fa-map-marker-alt"></i>
+        Track Order
+      </a>
+      <a class="sidebar-link {% if '/edit_profile/' in request.path %}active{% endif %}"
+         href="{% url 'edit_profile' %}">
+        <i class="fas fa-user-edit"></i>
+        Edit Profile
+      </a>
+      <a class="sidebar-link {% if '/change_password/' in request.path %}active{% endif %}"
+         href="{% url 'change_password' %}">
+        <i class="fas fa-lock"></i>
+        Change Password
+      </a>
+    </ul>
+
+    <!-- Logout -->
+    <a class="sidebar-logout" href="{% url 'logout' %}">
+      <i class="fas fa-power-off"></i>
+      Log Out
+    </a>
+
+  </div>
+
 </aside>

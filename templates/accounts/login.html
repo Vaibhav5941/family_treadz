@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %}{% comment %} {% extends 'base.html' %}
 
 
 {% block content %}
@@ -19,33 +19,217 @@ Already verified? <a href="{% url 'login' %}">Login</a>
 
 	<div class="card mx-auto" style="max-width: 380px; margin-top:100px;">
 
-      <div class="card-body">
-      <h4 class="card-title mb-4">Sign in</h4>
-      {% include 'includes/alerts.html' %}
-      <form action="{% url 'login' %}" method="POST">
-        {% csrf_token %}
-          <div class="form-group">
-			 <input type="email" class="form-control" placeholder="Email Address" name="email">
-          </div> <!-- form-group// -->
-          <div class="form-group">
-			<input type="password" class="form-control" placeholder="Password" name="password">
-          </div> <!-- form-group// -->
+      
 
-          <div class="form-group">
-          	<a href="{% url 'forgotPassword' %}" class="float-right">Forgot password?</a>
+<div class="card login-card">
+  <div class="card-body">
+    <h4 class="card-title mb-4">Sign in</h4>
+    {% include 'includes/alerts.html' %}
+    <form action="{% url 'login' %}" method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        <input type="email" class="form-control" placeholder="Email Address" name="email">
+      </div>
+      <div class="form-group">
+        <input type="password" class="form-control" placeholder="Password" name="password">
+      </div>
+      <div class="form-group">
+        <a href="{% url 'forgotPassword' %}" class="float-right">Forgot password?</a>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-          </div> <!-- form-group form-check .// -->
-          <div class="form-group">
-              <button type="submit" class="btn btn-primary btn-block"> Login  </button>
-          </div> <!-- form-group// -->
-      </form>
-      </div> <!-- card-body.// -->
-    </div> <!-- card .// -->
-
-     <p class="text-center mt-4">Don't have account? <a href="{% url 'register' %}">Sign up</a></p>
-     <br><br>
+<p class="text-center mt-4 signup-link">Don't have account? <a href="{% url 'register' %}">Sign up</a></p>
+<br><br>
 <!-- ============================ COMPONENT LOGIN  END.// ================================= -->
 {% endif %}
 
 </section>
+<style>
+  .login-card {
+    box-shadow: 0 4px 6px rgba(147, 112, 219, 0.1), 0 1px 3px rgba(147, 112, 219, 0.08);
+    border: 2px solid #9f2089;
+
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .login-card .card-body {
+    padding: 2.5rem;
+    background: linear-gradient(135deg, #faf8ff 0%, #f5f0ff 100%);
+  }
+
+  .login-card .card-title {
+    color: #9f2089;
+    font-weight: 600;
+    font-size: 1.75rem;
+    letter-spacing: -0.5px;
+  }
+
+  .login-card .form-control {
+    border: 2px solid #9f2089;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+  }
+
+  .login-card .form-control:focus {
+    border-color: #9f2089;
+    box-shadow:0 6px 12px rgba(159, 32, 137, 0.25);
+   
+    outline: none;
+  }
+
+  .login-card .form-control::placeholder {
+    color: #9f2089;
+  }
+
+  .login-card .btn-primary {
+    background: #9f2089;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);
+  }
+
+  .login-card .btn-primary:hover {
+    background: linear-gradient(135deg, #B3599A 20%, #8a1c75 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(187, 166, 248, 0.4)
+  }
+
+  .login-card .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .login-card .float-right {
+    color: #9f2089;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+  }
+
+  .login-card .float-right:hover {
+    color: #8a1c75;
+    text-decoration: underline;
+  }
+
+  .signup-link {
+    color: #6b7280;
+  }
+
+  .signup-link a {
+    color: #9f2089;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+
+  .signup-link a:hover {
+    color: #9f2089;
+    text-decoration: underline;
+  }
+</style>
+{% endblock %} {% endcomment %}
+
+
+{% block content %}
+
+<section class="section-conten pt-2 pb-5">
+
+  {% if request.GET.command == 'verification' %}
+
+    <!-- ── Verification Message ── -->
+    <div class="verification-alert">
+      <i class="fas fa-envelope-open-text" style="font-size:2.2rem; color: var(--caramel); margin-bottom:14px; display:block;"></i>
+      <strong style="font-family:'Cormorant Garamond',serif; font-size:1.3rem; color:var(--espresso); display:block; margin-bottom:10px;">Check Your Inbox</strong>
+      Thank you for registering. We've sent a verification email to
+      <strong style="color:var(--espresso);">{{ request.GET.email }}</strong>.<br><br>
+      Already verified? <a href="{% url 'login' %}">Sign in here →</a>
+    </div>
+
+  {% else %}
+
+    <!-- ── Login Card ── -->
+    <div class="login-wrapper">
+
+      <div class="login-card">
+
+        <!-- Accent bar -->
+        <div class="login-card-accent"></div>
+
+        <div class="card-body">
+
+          <!-- Header -->
+          <div class="login-card-header">
+            <div class="login-card-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <h4 class="card-title">Welcome Back</h4>
+            <p class="card-subtitle">Sign in to continue shopping</p>
+          </div>
+
+          {% include 'includes/alerts.html' %}
+
+          <form action="{% url 'login' %}" method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email"
+                     class="form-control"
+                     placeholder="you@example.com"
+                     name="email"
+                     autocomplete="email"
+                     required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password"
+                     class="form-control"
+                     placeholder="Enter your password"
+                     name="password"
+                     autocomplete="current-password"
+                     required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 4px;">
+              <a href="{% url 'forgotPassword' %}" class="forgot-link">Forgot password?</a>
+              <div style="clear:both;"></div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <button type="submit" class="btn-login">
+                Sign In
+              </button>
+            </div>
+
+          </form>
+
+          <div class="login-divider">
+            <span>New to Family Trends?</span>
+          </div>
+
+          <p class="signup-link">
+            Don't have an account? <a href="{% url 'register' %}">Create one →</a>
+          </p>
+
+        </div><!-- /card-body -->
+      </div><!-- /login-card -->
+
+    </div><!-- /login-wrapper -->
+
+  {% endif %}
+
+</section>
+
 {% endblock %}

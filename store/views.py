@@ -6,7 +6,7 @@ from django.db.models import Q
 
 from carts.views import _cart_id
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from .forms import ReviewForm
 from django.contrib import messages
 from orders.models import OrderProduct
@@ -15,17 +15,20 @@ from orders.models import OrderProduct
 def store(request, category_slug=None):
     categories = None
     products = None
+    
+    # Get all categories for the sidebar
+    all_categories = Category.objects.all()
 
     if category_slug != None:
         categories = get_object_or_404(Category, slug=category_slug)
         products = Product.objects.filter(category=categories, is_available=True)
-        paginator = Paginator(products, 1)
+        paginator = Paginator(products, 12)  # Changed to 6 for better mobile display
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
         product_count = products.count()
     else:
         products = Product.objects.all().filter(is_available=True).order_by('id')
-        paginator = Paginator(products, 3)
+        paginator = Paginator(products, 12)  # Changed to 6 for better mobile display
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
         product_count = products.count()
@@ -33,6 +36,8 @@ def store(request, category_slug=None):
     context = {
         'products': paged_products,
         'product_count': product_count,
+        'links': all_categories,  # All categories for sidebar
+        'current_category': categories,  # Current selected category
     }
     return render(request, 'store/store.html', context)
 
@@ -57,10 +62,16 @@ def product_detail(request, category_slug, product_slug):
 
     # Get the product gallery
     product_gallery = ProductGallery.objects.filter(product_id=single_product.id)
-
+     # Get other products from the same category (excluding current product)
+    related_products = Product.objects.filter(
+        category=single_product.category,
+        is_available=True
+    ).exclude(id=single_product.id).order_by('-created_date')[:8]
+    # Showing 8 products (2 rows of 4 on desktop)
     context = {
         'single_product': single_product,
         'in_cart'       : in_cart,
+        'related_products': related_products, 
         'orderproduct': orderproduct,
         'reviews': reviews,
         'product_gallery': product_gallery,
@@ -69,6 +80,9 @@ def product_detail(request, category_slug, product_slug):
 
 
 def search(request):
+    # Get all categories for the sidebar
+    all_categories = Category.objects.all()
+    
     if 'keyword' in request.GET:
         keyword = request.GET['keyword']
         if keyword:
@@ -77,6 +91,7 @@ def search(request):
     context = {
         'products': products,
         'product_count': product_count,
+        'links': all_categories,
     }
     return render(request, 'store/store.html', context)
 
@@ -103,3 +118,36 @@ def submit_review(request, product_id):
                 data.save()
                 messages.success(request, 'Thank you! Your review has been submitted.')
                 return redirect(url)
+def get_sizes_by_color(request, product_id):
+    """
+    API endpoint to get available sizes for a selected color
+    Returns JSON with filtered sizes
+    """
+    try:
+        product = Product.objects.get(id=product_id)
+        selected_color = request.GET.get('color', '').lower()
+        
+        if not selected_color:
+            return JsonResponse({'error': 'Color not provided'}, status=400)
+        
+        # Get all sizes for this product that match the selected color
+        # Sizes are stored as "color-size" format (e.g., "red-m", "red-l")
+        sizes = product.variation_set.filter(
+            variation_category='size',
+            is_active=True,
+            variation_value__istartswith=selected_color + '-'
+        ).values_list('variation_value', flat=True)
+        
+        # Extract just the size part (remove the color prefix)
+        # e.g., "red-m" becomes "m"
+        size_list = [size.split('-', 1)[1] for size in sizes]
+        
+        return JsonResponse({
+            'sizes': size_list,
+            'success': True
+        })
+    except Product.DoesNotExist:
+        return JsonResponse({'error': 'Product not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)            
+    

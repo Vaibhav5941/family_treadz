@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice #{{ order.order_number }}</title>
+    <style>
+        @page { size: A4; margin: 1cm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; color: #333; padding: 20px; }
+        
+        .invoice-header {
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .company-info h1 { color: #4CAF50; font-size: 28px; }
+        
+        .details-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .order-info { margin: 15px 0; }
+        .order-info strong { color: #4CAF50; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background: #333;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .totals {
+            float: right;
+            width: 300px;
+            margin-top: 20px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        
+        .grand-total {
+            border-top: 2px solid #333;
+            font-weight: bold;
+            font-size: 18px;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-header">
+        <h1>Family Trendz</h1>
+        <p>Invoice #{{ order.order_number }}</p>
+    </div>
+    
+    <div class="details-section">
+        <h3>Bill To:</h3>
+        <p><strong>{{ order.full_name }}</strong></p>
+        <p>{{ order.full_address }}</p>
+        <p>{{ order.city }}, {{ order.state }}, {{ order.country }}</p>
+        <p>Email: {{ order.email }} | Phone: {{ order.phone }}</p>
+    </div>
+    
+    <div class="order-info">
+        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+        <p><strong>Transaction ID:</strong> {{ order.payment.payment_id }}</p>
+        <p><strong>Order Date:</strong> {{ order.created_at|date:"d M, Y" }}</p>
+        <p><strong>Status:</strong> {{ order.payment.status }}</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order_detail %}
+            <tr>
+                <td>
+                    {{ item.product.product_name }}
+                    {% if item.variations.all %}
+                        <br><small>
+                        {% for i in item.variations.all %}
+                            {{ i.variation_category|capfirst }}: {{ i.variation_value|capfirst }}
+                        {% endfor %}
+                        </small>
+                    {% endif %}
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td>Rs {{ item.product_price }}</td>
+                <td>Rs {% widthratio item.product_price 1 item.quantity %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="totals">
+        <div class="total-row">
+            <span>Subtotal:</span>
+            <span>Rs {{ subtotal }}</span>
+        </div>
+        <div class="total-row">
+            <span>Tax:</span>
+            <span>Rs {{ order.tax }}</span>
+        </div>
+        <div class="total-row grand-total">
+            <span>Grand Total:</span>
+            <span>Rs {{ order.order_total }}</span>
+        </div>
+    </div>
+    
+    <div style="clear: both; text-align: center; margin-top: 50px;">
+        <p>Thank you for shopping with us!</p>
+    </div>
+</body>
+</html>

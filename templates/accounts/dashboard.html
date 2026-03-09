@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% comment %} {% extends 'base.html' %}
 
 
 {% block content %}
@@ -46,6 +47,85 @@
 </div>
 
 
+</section>
+
+{% endblock %} {% endcomment %}
+
+
+
+
+{% block content %}
+
+
+
+<section class="section-conten pt-4 pb-5">
+  {% include 'includes/alerts.html' %}
+  <div class="container">
+    <div class="row">
+
+      {% include 'includes/dashboard_sidebar.html' %}
+
+      <main class="col-md-9 col-sm-12">
+        <article class="dashboard-card">
+
+          <!-- Header -->
+          <div class="dashboard-card-header">
+            <div class="header-icon">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="header-text">
+              <strong>Logged in as</strong>
+              <span class="user-name">{{ user.full_name }}</span>
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            <!-- Welcome Banner -->
+            <div class="welcome-banner">
+              <i class="fas fa-coffee"></i>
+              <p>Welcome back, <strong>{{ user.full_name }}</strong>! Here's a summary of your account.</p>
+            </div>
+
+            <div class="row">
+
+              <!-- Orders Card -->
+              <div class="col-md-6 col-sm-12 mb-4">
+                <div class="stat-card stat-card-orders">
+                  <div class="stat-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                  </div>
+                  <p class="stat-label">Total Orders</p>
+                  <div class="stat-value">{{ orders_count }}</div>
+                  <a href="{% url 'my_orders' %}" class="btn-view-orders">View Orders →</a>
+                </div>
+              </div>
+
+              <!-- Profile Card -->
+              <div class="col-md-6 col-sm-12 mb-4">
+                <div class="stat-card stat-card-profile">
+                  <img src="{{ userprofile.profile_picture.url }}"
+                       alt="Profile Picture"
+                       class="profile-avatar">
+                  <p class="profile-name">{{ user.full_name }}</p>
+                  <p class="profile-email">
+                    <i class="fas fa-envelope" style="color:var(--caramel); font-size:0.75rem; margin-right:4px;"></i>
+                    {{ user.email }}
+                  </p>
+                  <p class="profile-phone">
+                    <i class="fas fa-phone" style="color:var(--caramel); font-size:0.75rem; margin-right:4px;"></i>
+                    {{ user.phone_number }}
+                  </p>
+                </div>
+              </div>
+
+            </div><!-- /row -->
+          </div><!-- /card-body -->
+        </article>
+      </main>
+
+    </div>
+  </div>
 </section>
 
 {% endblock %}

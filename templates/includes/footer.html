@@ -1,33 +1,495 @@
+<html lang="en">
+<head>
+<style>
+        /* Scoped styles - won't affect other components */
+        .family-trends-footer {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .family-trends-footer * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .family-trends-footer.section-footer {
+            background: #f8f9fa;
+            color: #495057;
+            margin-top: 50px;
+        }
+
+        .family-trends-footer .footer-top {
+            padding-top: 30px;
+            border-top: 3px solid  rgb(198, 134, 66);;
+        }
+
+        .family-trends-footer .ft-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .family-trends-footer .ft-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+
+        .family-trends-footer .ft-col-3,
+        .family-trends-footer .ft-col-2,
+        .family-trends-footer .ft-col-8 {
+            padding: 0 15px;
+            margin-bottom: 30px;
+        }
+
+        .family-trends-footer .ft-col-3 {
+            flex: 0 0 25%;
+            max-width: 25%;
+        }
+
+        .family-trends-footer .ft-col-2 {
+            flex: 0 0 16.666%;
+            max-width: 16.666%;
+        }
+
+        .family-trends-footer .ft-col-8 {
+            flex: 0 0 66.666%;
+            max-width: 66.666%;
+        }
+
+        .family-trends-footer .footer-section h5 {
+            color: #4A2C17;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .family-trends-footer .footer-section h5::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: rgb(198, 134, 66);;
+        }
+
+        .family-trends-footer .footer-section ul {
+            list-style: none;
+        }
+
+        .family-trends-footer .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .family-trends-footer .footer-section ul li a {
+            color: #6c757d;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .family-trends-footer .footer-section ul li a:hover {
+            color: #CBB6A5;
+            padding-left: 5px;
+        }
+
+        .family-trends-footer .footer-about p {
+            color: #6c757d;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .family-trends-footer .contact-info {
+            margin-top: 15px;
+        }
+
+        .family-trends-footer .contact-item {
+            display: flex;
+            align-items: start;
+            margin-bottom: 12px;
+            color: #6c757d;
+        }
+
+        .family-trends-footer .contact-item i {
+            color: rgb(198, 134, 66);
+            margin-right: 10px;
+            width: 20px;
+            margin-top: 3px;
+        }
+
+        .family-trends-footer .social-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .family-trends-footer .social-links a {
+            width: 38px;
+            height: 38px;
+            background: rgb(198, 134, 66);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .family-trends-footer .social-links a:hover {
+            background: #CBB6A5;
+            transform: translateY(-3px);
+        }
+
+        .family-trends-footer .newsletter-box {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .family-trends-footer .newsletter-box h5 {
+            color: #4A2C17;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .family-trends-footer .newsletter-box p {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .family-trends-footer .newsletter-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .family-trends-footer .newsletter-form input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .family-trends-footer .newsletter-form input:focus {
+            border-color: #4a90e2;
+        }
+
+        .family-trends-footer .newsletter-form button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            background:  rgb(198, 134, 66);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .family-trends-footer .newsletter-form button:hover {
+            background: #CBB6A5;
+        }
+
+        .family-trends-footer .footer-bottom {
+            background: #e9ecef;
+            padding: 25px 0;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .family-trends-footer .text-muted {
+            color: #6c757d;
+        }
+
+        .family-trends-footer .text-md-center {
+            text-align: center;
+        }
+
+        .family-trends-footer .text-md-right {
+            text-align: right;
+        }
+
+        .family-trends-footer .footer-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .family-trends-footer .footer-links a {
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .family-trends-footer .footer-links a:hover {
+            color: #CBB6A5;
+        }
+
+        /* Mobile Navigation - Hidden on desktop */
+        .family-trends-footer .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .family-trends-footer .mobile-nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            
+        }
+
+        .family-trends-footer .mobile-nav ul li {
+            flex: 1;
+        }
+
+        .family-trends-footer .mobile-nav ul li a {
+            text-decoration: none;
+            color: #6c757d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 5px;
+            transition: all 0.3s;
+        }
+
+        .family-trends-footer .mobile-nav ul li a:active {
+            color: #4a90e2;
+            transform: scale(0.95);
+        }
+
+        .family-trends-footer .mobile-nav ul li a i {
+            font-size: 24px;
+        }
+
+        .family-trends-footer .mobile-nav ul li a span {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Active state */
+        .family-trends-footer .mobile-nav ul li a.active {
+            color: rgb(198, 134, 66);
+        }
+
+        @media (max-width: 768px) {
+            .family-trends-footer .ft-col-3,
+            .family-trends-footer .ft-col-2,
+            .family-trends-footer .ft-col-8,
+            .family-trends-footer .ft-col-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .family-trends-footer .text-md-center,
+            .family-trends-footer .text-md-right {
+                text-align: center;
+            }
+
+            .family-trends-footer .newsletter-form {
+                flex-direction: column;
+            }
+
+            .family-trends-footer .mobile-nav {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Demo content for spacing -->
+<div style="padding: 20px 0px 0px; text-align: center; background: #fff;">
+    <h1 style="color: #4A2C17; font-size: 2rem">Family Trends</h1>
+    <p style="color: #6c757d;">Your Trusted Family Shopping Destination</p>
+</div>
+
 <!-- ========================= FOOTER ========================= -->
-<footer class="section-footer border-top">
-	<div class="container">
-		<section class="footer-bottom border-top row">
-			<div class="col-md-2">
-				<p class="text-muted"> &copy 2019 Company name </p>
-			</div>
-			<div class="col-md-8 text-md-center">
-				<span  class="px-2">info@pixsellz.io</span>
-				<span  class="px-2">+879-332-9375</span>
-				<span  class="px-2">Street name 123, Avanue abc</span>
-			</div>
-			<div class="col-md-2 text-md-right text-muted">
-				<i class="fab fa-lg fa-cc-visa"></i>
-				<i class="fab fa-lg fa-cc-paypal"></i>
-				<i class="fab fa-lg fa-cc-mastercard"></i>
-			</div>
-		</section>
-	</div><!-- //container -->
-</footer>
+<footer class="family-trends-footer section-footer">
+    
+    <div class="footer-top">
+        <div class="ft-container">
+            <div class="ft-row">
+                <!-- About Section -->
+                <div class="ft-col-3">
+                    <div class="footer-section footer-about">
+                        <h5>About Family Trends</h5>
+                        <p>Your one-stop destination for quality family products. We bring together style, comfort, and affordability for every member of your family.</p>
+                        <div class="social-links">
+                            <a href="https://www.facebook.com/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://x.com/" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="https://www.instagram.com/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                            <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Service -->
+                <div class="ft-col-3">
+                    <div class="footer-section">
+                        <h5>Customer Service</h5>
+                        <ul>
+							<li><a href="#">About Us</a></li>
+                            <li><a href="#">Help Center</a></li>
+                            <li><a href="#">Size Guide</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms & Conditions</a></li>
+                            
+                           
+                        </ul>
+                    </div>
+                </div>
+
+                {% comment %} <!-- Quick Links -->
+                <div class="ft-col-3">
+                    <div class="footer-section">
+                        <h5>Quick Links</h5>
+                        <ul>
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms & Conditions</a></li>
+                            <li><a href="#">FAQ</a></li>
+                            <li><a href="#">Blog</a></li>
+                            <li><a href="#">Careers</a></li>
+                        </ul>
+                    </div>
+                </div> {% endcomment %}
+
+                <!-- Newsletter -->
+                <div class="ft-col-6">
+                    <div class="newsletter-box">
+                        <h5>Subscribe to Our Newsletter</h5>
+                        <p>Get exclusive offers and updates delivered to your inbox!</p>
+                        <form class="newsletter-form">
+                            <input type="email" placeholder="Your email address" required>
+                            <button type="submit">Subscribe</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="ft-row" style="margin-top: 15px;">
+                <div class="ft-col-3">
+                    <div class="footer-section">
+                        <h5>Contact Us</h5>
+                        <div class="contact-info">
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>gvaibhav59@gmail.com</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <span>+1 (555) 123-4567</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>123 Family Street, Suite 100<br>Shopping District, NY 10001</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ft-col-3">
+                    <div class="footer-section">
+                        <h5>Shop Categories</h5>
+                        <ul>
+                            <li><a href="/store/category/women/">Women's Fashion</a></li>
+                            <li><a href="/store/category/men/">Men's Fashion</a></li>
+                            <li><a href="/store/category/kid/">Kids & Baby</a></li>
+							<li><a href="/store/category/kid/">Men & Women Accessories</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="ft-col-3">
+                    <div class="footer-section">
+                        <h5>My Account</h5>
+                        <ul>
+                            <li><a href="/accounts/login/">Sign In</a></li>
+                            <li><a href="/accounts/my_orders/">My Orders</a></li>
+                            <li><a href="/cart/">Wishlist</a></li>
+                            <li><a href="/accounts/edit_profile/">Account Settings</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="ft-col-3">
+                    <div class="footer-section">
+                        <h5>We Accept</h5>
+                        <div style="margin-top: 15px;">
+                            <i class="fab fa-cc-visa" style="font-size: 36px; color: #1A1F71; margin-right: 10px;"></i>
+                            <i class="fab fa-cc-mastercard" style="font-size: 36px; color: #EB001B; margin-right: 10px;"></i>
+                            <i class="fab fa-cc-paypal" style="font-size: 36px; color: #003087; margin-right: 10px;"></i>
+                            <i class="fab fa-cc-amex" style="font-size: 36px; color: #006FCF;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<nav class="mobile-nav">
+        <ul>
+            <li>
+                <a href="/" class="active">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="/store/">
+                    <i class="fas fa-th-large"></i>
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="/cart/">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Cart</span>
+                </a>
+            </li>
+            <li>
+                <a href="/accounts/my_orders/">
+                    <i class="fas fa-box"></i>
+                    <span>My Orders</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+
+    
 <!-- ========================= FOOTER END // ========================= -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-	$(document).ready(function(){
-		$('.thumb a').click(function(e){
-			e.preventDefault();
-			$('.mainImage img').attr('src', $(this).attr("href"));
-		})
-	})
-</script>
+      <script>
+        // Set active state based on current URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.mobile-nav a');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
