@@ -1,6 +1,6 @@
 # DELETE सब कुछ
 # Replace with यह:
-python-3.11.9
+
 Django==5.0.1
 python-decouple==3.8
 Pillow==10.3.0
@@ -17,4 +17,5 @@ django-filter==23.5
 django-cors-headers==4.3.1
 
 # यह है! बाकी सब निकालो!
+
 
