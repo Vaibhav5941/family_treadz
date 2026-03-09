@@ -42,8 +42,10 @@ INSTALLED_APPS = [
     'carts',
     'orders',
     'banners',
+    'cloudinary',
+    'cloudinary_storage',
 ]
-
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # [UPDATED] - Add WhiteNoise middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -84,7 +86,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'greatkart.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
-
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
 # ==================== [UPDATED] - DATABASE CONFIGURATION ====================
 # Production: PostgreSQL on Render
 # Development: SQLite local
