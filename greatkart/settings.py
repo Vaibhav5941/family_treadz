@@ -142,7 +142,7 @@ STATICFILES_DIRS = [
 ]
 
 # [NEW] WhiteNoise compression for optimized static file serving
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media files configuration
 MEDIA_URL = '/media/'
