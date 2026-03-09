@@ -56,7 +56,7 @@ def register(request):
                 to=[to_email]
             )
             send_email.content_subtype = 'html'  # ✅ Send as HTML
-            send_email.send(
+            send_email.send()
             # messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address [rathan.kumar@gmail.com]. Please verify it.')
             return redirect('/accounts/login/?command=verification&email='+email)
     else:
