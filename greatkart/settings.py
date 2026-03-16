@@ -182,7 +182,7 @@ MESSAGE_TAGS = {
 print("\n" + "="*70)
 print("📧 EMAIL CONFIGURATION")
 print("="*70)
-
+ 
 if DEBUG:
     # Local Development - Console Backend
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -190,18 +190,22 @@ if DEBUG:
     print("✅ Environment: LOCAL (Console Backend)")
     print("   Emails will print to console")
 else:
-    # Production (Render) - SMTP Backend
+    # Production (Render) - Gmail SMTP with App Password
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     print("✅ Environment: PRODUCTION (Render)")
     
     # Get email configuration from environment variables
+    # IMPORTANT: Use Gmail App Password (16-character password), NOT your regular Gmail password
     EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
     EMAIL_PORT = config('EMAIL_PORT', default='587', cast=int)
     EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')  # This should be your 16-char App Password
     EMAIL_USE_TLS = config('EMAIL_USE_TLS', default='True', cast=bool)
     EMAIL_USE_SSL = False
     DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@greatkart.com')
+    
+    # Timeout for email operations
+    EMAIL_TIMEOUT = 10
     
     # Display configuration
     print(f"✅ EMAIL_BACKEND: {EMAIL_BACKEND}")
@@ -209,6 +213,7 @@ else:
     print(f"✅ EMAIL_PORT: {EMAIL_PORT}")
     print(f"✅ EMAIL_HOST_USER: {EMAIL_HOST_USER if EMAIL_HOST_USER else '❌ NOT SET'}")
     print(f"✅ EMAIL_USE_TLS: {EMAIL_USE_TLS}")
+    print(f"✅ EMAIL_USE_SSL: {EMAIL_USE_SSL}")
     print(f"✅ DEFAULT_FROM_EMAIL: {DEFAULT_FROM_EMAIL}")
     
     # Validate configuration
@@ -218,7 +223,12 @@ else:
             print("   ❌ EMAIL_HOST_USER not set in environment variables")
         if not EMAIL_HOST_PASSWORD:
             print("   ❌ EMAIL_HOST_PASSWORD not set in environment variables")
-
+    
+    # Test email configuration (optional)
+    if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+        print("\n✅ Email configuration appears complete")
+        print("   Make sure EMAIL_HOST_PASSWORD is a Gmail App Password (16 characters)")
+ 
 print("="*70 + "\n")
 # ==============================================================
 
@@ -247,6 +257,11 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'greatkart.log',
+            'formatter': 'verbose',
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -254,13 +269,18 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,
         },
         'django.request': {
-            'handlers': ['console'],
-            'level': 'ERROR',  # Log all request errors
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.core.mail': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',  # Log email sending attempts
             'propagate': False,
         },
     },
