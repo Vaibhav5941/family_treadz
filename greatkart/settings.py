@@ -179,31 +179,22 @@ MESSAGE_TAGS = {
 }
 
 # ==================== EMAIL CONFIGURATION ====================
-# if DEBUG:
-#     # LOCAL - Console Backend (email terminal mein print hoga)
-#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-#     DEFAULT_FROM_EMAIL = 'noreply@localhost'
-# else:
-#     # PRODUCTION - Gmail SMTP (email Gmail se jayega)
-#     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#     EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-#     EMAIL_PORT = config('EMAIL_PORT', default='587', cast=int)
-#     EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-#     EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-#     EMAIL_USE_TLS = config('EMAIL_USE_TLS', default='True', cast=bool)
-#     EMAIL_USE_SSL = False
-#     DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@greatkart.com')
+if DEBUG:
+    # LOCAL - Console Backend (email terminal mein print hoga)
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'noreply@localhost'
+else:
+    # PRODUCTION - Gmail SMTP (email Gmail se jayega)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+    EMAIL_PORT = config('EMAIL_PORT', default='587', cast=int)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default='True', cast=bool)
+    EMAIL_USE_SSL = False
+    DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@greatkart.com')
 
-# Using Resend API Service
- 
-# Resend API Key from environment
-RESEND_API_KEY = config('RESEND_API_KEY', default='')
- 
-# Email settings for Resend
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@family-trendz.com')
- 
-# Django will not send emails directly, Resend handles it
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.locmem.EmailBackend'
+
 # ==============================================================
 
 # ==================== STRIPE CONFIGURATION ====================
