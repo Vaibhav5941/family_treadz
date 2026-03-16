@@ -16,11 +16,9 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from carts.views import _cart_id
 from carts.models import Cart, CartItem
-import resend
+
 import requests
 
-# Initialize Resend
-resend.api_key = settings.RESEND_API_KEY
 
 def register(request):
     if request.method == 'POST':
@@ -51,28 +49,18 @@ def register(request):
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
             })
-            try:
-                resend.Emails.send({
-                    "from": settings.DEFAULT_FROM_EMAIL,
-                    "to": email,
-                    "subject": mail_subject,
-                    "html": message,
-                })
-                print(f"✅ Registration email sent to {email}")
-            except Exception as e:
-                print(f"❌ Email error: {str(e)}")
-                pass
-            # to_email = email
-            # send_email = EmailMessage(
-            #     subject=mail_subject,
-            #     body=message,
-            #     from_email=settings.DEFAULT_FROM_EMAIL,
-            #     to=[to_email]
-            # )
+           
+            to_email = email
+            send_email = EmailMessage(
+                subject=mail_subject,
+                body=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[to_email]
+            )
              
-            # send_email.send()
+            send_email.send()
             
-            # messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address [rathan.kumar@gmail.com]. Please verify it.')
+            messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address [rathan.kumar@gmail.com]. Please verify it.')
             return redirect('/accounts/login/?command=verification&email='+email)
     else:
         form = RegistrationForm()
@@ -199,29 +187,18 @@ def forgotPassword(request):
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
             })
-            try:
-                resend.Emails.send({
-                    "from": settings.DEFAULT_FROM_EMAIL,
-                    "to": email,
-                    "subject": mail_subject,
-                    "html": message,
-                })
-                print(f"✅ Password reset email sent to {email}")
-                messages.success(request, 'Password reset email has been sent to your email address.')
-            except Exception as e:
-                print(f"❌ Email error: {str(e)}")
-                messages.error(request, 'Error sending email. Please try again.')
-            # to_email = email
-            # send_email = EmailMessage(
-            #     subject=mail_subject,
-            #     body=message,
-            #     from_email=settings.DEFAULT_FROM_EMAIL,
-            #     to=[to_email]
-            # )
+         
+            to_email = email
+            send_email = EmailMessage(
+                subject=mail_subject,
+                body=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[to_email]
+            )
             
-            # send_email.send()
+            send_email.send()
 
-            # messages.success(request, 'Password reset email has been sent to your email address.')
+            messages.success(request, 'Password reset email has been sent to your email address.')
             return redirect('login')
         else:
             messages.error(request, 'Account does not exist!')
