@@ -8,6 +8,8 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -89,7 +91,7 @@ def send_order_confirmation_email(user, order, request=None):
 
 def payments(request):
     """
-    ✅ UPDATED: Now uses Resend API for email sending
+    ✅ UPDATED: Now uses Resend API for email sending with proper URL generation
     """
     body = json.loads(request.body)
     order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
@@ -132,8 +134,8 @@ def payments(request):
 
     CartItem.objects.filter(user=request.user).delete()
 
-    # ✅ SEND ORDER CONFIRMATION EMAIL VIA RESEND
-    email_sent = send_order_confirmation_email(request.user, order, request)
+    # ✅ SEND ORDER CONFIRMATION EMAIL VIA RESEND WITH REQUEST CONTEXT
+    email_sent = send_order_confirmation_email(request.user, order, request)  # Pass request here
     
     if not email_sent:
         logger.warning(f"Failed to send order confirmation email for order {order.order_number}")
@@ -385,7 +387,8 @@ def stripe_webhook(request):
             CartItem.objects.filter(user=order.user).delete()
             
             # ✅ SEND ORDER CONFIRMATION EMAIL VIA RESEND
-            email_sent = send_order_confirmation_email(order.user, order)
+            # NOTE: In webhook context, request is None, so we use SITE_URL from settings
+            email_sent = send_order_confirmation_email(order.user, order, request=None)
             
             if not email_sent:
                 logger.warning(f"Failed to send order confirmation email for order {order.order_number}")
