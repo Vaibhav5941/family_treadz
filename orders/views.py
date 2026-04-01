@@ -24,9 +24,10 @@ logger = logging.getLogger(__name__)
 resend.api_key = settings.RESEND_API_KEY
 
 
-def send_order_confirmation_email(user, order):
+def send_order_confirmation_email(user, order, request=None):
     """
     ✅ SEND ORDER CONFIRMATION EMAIL VIA RESEND WITH PROPER ERROR HANDLING
+    Now generates dynamic URL for invoice download
     """
     try:
         # Check if API key exists
@@ -39,16 +40,29 @@ def send_order_confirmation_email(user, order):
             logger.error("DEFAULT_FROM_EMAIL is not set")
             raise ValueError("DEFAULT_FROM_EMAIL not configured")
         
+        # ✅ GENERATE DYNAMIC INVOICE URL
+        if request:
+            # Get current site domain
+            current_site = get_current_site(request)
+            domain = current_site.domain
+            protocol = 'https' if request.is_secure() else 'http'
+            invoice_url = f"{protocol}://{domain}{reverse('download_order_invoice', args=[order.id])}"
+        else:
+            # Fallback if request is not available (e.g., in webhook)
+            invoice_url = f"{settings.SITE_URL}{reverse('download_order_invoice', args=[order.id])}"
+        
         mail_subject = 'Thank you for your order!'
         message = render_to_string('orders/order_recieved_email.html', {
             'user': user,
             'order': order,
+            'invoice_download_url': invoice_url,  # ✅ Pass dynamic URL
         })
         
         print(f"🔍 DEBUG: Sending order confirmation email with Resend")
         print(f"   From: {settings.DEFAULT_FROM_EMAIL}")
         print(f"   To: {user.email}")
         print(f"   Subject: {mail_subject}")
+        print(f"   Invoice URL: {invoice_url}")
         print(f"   API Key exists: {bool(settings.RESEND_API_KEY)}")
         
         # Send email via Resend
@@ -61,6 +75,7 @@ def send_order_confirmation_email(user, order):
         
         print(f"✅ Resend response: {response}")
         logger.info(f"Order confirmation email sent to {user.email}")
+        logger.info(f"Invoice download URL: {invoice_url}")
         return True
         
     except Exception as e:
@@ -118,7 +133,7 @@ def payments(request):
     CartItem.objects.filter(user=request.user).delete()
 
     # ✅ SEND ORDER CONFIRMATION EMAIL VIA RESEND
-    email_sent = send_order_confirmation_email(request.user, order)
+    email_sent = send_order_confirmation_email(request.user, order, request)
     
     if not email_sent:
         logger.warning(f"Failed to send order confirmation email for order {order.order_number}")
