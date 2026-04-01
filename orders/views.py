@@ -272,91 +272,81 @@ def create_checkout_session(request):
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-    
+
     try:
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except ValueError as e:
+    except ValueError:
         return JsonResponse({'error': 'Invalid payload'}, status=400)
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.error.SignatureVerificationError:
         return JsonResponse({'error': 'Invalid signature'}, status=400)
-    
-    # Handle payment_intent.succeeded event
+
     if event['type'] == 'checkout.session.completed':
-      session = event['data']['object']
-      order_number = session['metadata']['order_number']
-    
-      try:
-         order = Order.objects.get(order_number=order_number, is_ordered=False)
-        
-         payment = Payment(
-            user = order.user,
-            payment_id = session['payment_intent'],
-            payment_method = 'Stripe',
-            amount_paid = session['amount_total'] / 100,
-            status = 'COMPLETED',
-         )
-         payment.save()
-        
-         order.payment = payment
-         order.is_ordered = True
-         order.save()
-        
-         cart_items = CartItem.objects.filter(user=order.user)
-         for item in cart_items:
-            orderproduct = OrderProduct()
-            orderproduct.order_id = order.id
-            orderproduct.payment = payment
-            orderproduct.user_id = order.user.id
-            orderproduct.product_id = item.product_id
-            orderproduct.quantity = item.quantity
-            orderproduct.product_price = item.product.get_price()
-            orderproduct.ordered = True
-            orderproduct.save()
-            
-            cart_item = CartItem.objects.get(id=item.id)
-            product_variation = cart_item.variations.all()
-            orderproduct = OrderProduct.objects.get(id=orderproduct.id)
-            orderproduct.variations.set(product_variation)
-            orderproduct.save()
-            
-            product = Product.objects.get(id=item.product_id)
-            product.stock -= item.quantity
-            product.save()
-         
-         CartItem.objects.filter(user=order.user).delete()
-        
-         mail_subject = 'Thank you for your order!'
-         message = render_to_string('orders/order_recieved_email.html', {
-            'user': order.user,
-            'order': order,
-         })
-         to_email = order.user.email
-         try:
-            if not settings.RESEND_API_KEY:
-                raise ValueError("RESEND_API_KEY not configured")
+        session = event['data']['object']
+        order_number = session['metadata']['order_number']
 
-            if not settings.DEFAULT_FROM_EMAIL:
-                raise ValueError("DEFAULT_FROM_EMAIL not configured")
+        try:
+            order = Order.objects.get(order_number=order_number, is_ordered=False)
 
-            response = resend.Emails.send({
-                "from": settings.DEFAULT_FROM_EMAIL,
-                "to": to_email,
-                "subject": mail_subject,
-                "html": message,
+            payment = Payment(
+                user=order.user,
+                payment_id=session['payment_intent'],
+                payment_method='Stripe',
+                amount_paid=session['amount_total'] / 100,
+                status='COMPLETED',
+            )
+            payment.save()
+
+            order.payment = payment
+            order.is_ordered = True
+            order.save()
+
+            cart_items = CartItem.objects.filter(user=order.user)
+
+            for item in cart_items:
+                orderproduct = OrderProduct.objects.create(
+                    order_id=order.id,
+                    payment=payment,
+                    user_id=order.user.id,
+                    product_id=item.product_id,
+                    quantity=item.quantity,
+                    product_price=item.product.get_price(),
+                    ordered=True
+                )
+
+                orderproduct.variations.set(item.variations.all())
+
+                product = Product.objects.get(id=item.product_id)
+                product.stock -= item.quantity
+                product.save()
+
+            CartItem.objects.filter(user=order.user).delete()
+
+            # ✅ EMAIL VIA RESEND
+            mail_subject = 'Thank you for your order!'
+            message = render_to_string('orders/order_recieved_email.html', {
+                'user': order.user,
+                'order': order,
             })
+            to_email = order.user.email
 
-            print(f"✅ Stripe order email sent: {response}")
-            logger.info(f"Stripe order email sent to {to_email}")
+            try:
+                response = resend.Emails.send({
+                    "from": settings.DEFAULT_FROM_EMAIL,
+                    "to": to_email,
+                    "subject": mail_subject,
+                    "html": message,
+                })
 
-        except Exception as e:
-            print(f"❌ Error sending stripe email: {e}")
-            logger.error(f"Stripe email error: {e}")
-        
-      except Order.DoesNotExist:
-        pass
-    
-    return JsonResponse({'status': 'success'})  
-    
+                print(f"✅ Stripe email sent: {response}")
+                logger.info(f"Stripe email sent to {to_email}")
+
+            except Exception as e:
+                print(f"❌ Email error: {e}")
+                logger.error(f"Stripe email error: {e}")
+
+        except Order.DoesNotExist:
+            pass
+
     return JsonResponse({'status': 'success'})
