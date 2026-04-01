@@ -24,21 +24,22 @@ resend.api_key = settings.RESEND_API_KEY
 def payments(request):
     body = json.loads(request.body)
     order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-    
+
     payment = Payment(
-        user=request.user,
-        payment_id=body['transID'],
-        payment_method=body['payment_method'],
-        amount_paid=order.order_total,
-        status=body['status'],
+        user = request.user,
+        payment_id = body['transID'],
+        payment_method = body['payment_method'],
+        amount_paid = order.order_total,
+        status = body['status'],
     )
     payment.save()
-    
+
     order.payment = payment
     order.is_ordered = True
     order.save()
-    
+
     cart_items = CartItem.objects.filter(user=request.user)
+
     for item in cart_items:
         orderproduct = OrderProduct()
         orderproduct.order_id = order.id
@@ -49,46 +50,46 @@ def payments(request):
         orderproduct.product_price = item.product.get_price()
         orderproduct.ordered = True
         orderproduct.save()
-        
+
         cart_item = CartItem.objects.get(id=item.id)
         product_variation = cart_item.variations.all()
         orderproduct = OrderProduct.objects.get(id=orderproduct.id)
         orderproduct.variations.set(product_variation)
         orderproduct.save()
-        
+
         product = Product.objects.get(id=item.product_id)
         product.stock -= item.quantity
         product.save()
-    
+
     CartItem.objects.filter(user=request.user).delete()
-    
-    # SEND EMAIL VIA RESEND
+
     mail_subject = 'Thank you for your order!'
     message = render_to_string('orders/order_recieved_email.html', {
         'user': request.user,
         'order': order,
     })
     to_email = request.user.email
-    
     try:
-        print(f"🔍 DEBUG: Sending order email via Resend (payments)")
-        print(f"   From: {settings.DEFAULT_FROM_EMAIL}")
-        print(f"   To: {to_email}")
-        
-        response = resend.Emails.send({
-            "from": settings.DEFAULT_FROM_EMAIL,
-            "to": to_email,
-            "subject": mail_subject,
-            "html": message,
-        })
-        
-        print(f"✅ Resend response: {response}")
-        logger.info(f"Order email sent via Resend to {to_email}")
-        
+      if not settings.RESEND_API_KEY:
+          raise ValueError("RESEND_API_KEY not configured")
+
+      if not settings.DEFAULT_FROM_EMAIL:
+          raise ValueError("DEFAULT_FROM_EMAIL not configured")
+
+      response = resend.Emails.send({
+          "from": settings.DEFAULT_FROM_EMAIL,
+          "to": to_email,
+          "subject": mail_subject,
+          "html": message,
+      })
+
+      print(f"✅ Order email sent: {response}")
+      logger.info(f"Order email sent to {to_email}")
+
     except Exception as e:
-        print(f"❌ Error sending order email: {str(e)}")
-        logger.error(f"Error sending order email: {str(e)}")
-    
+      print(f"❌ Error sending order email: {e}")
+      logger.error(f"Order email error: {e}")
+
     data = {
         'order_number': order.order_number,
         'transID': payment.payment_id,
@@ -276,92 +277,86 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except ValueError:
-        print("❌ Invalid payload in webhook")
+    except ValueError as e:
         return JsonResponse({'error': 'Invalid payload'}, status=400)
-    except stripe.error.SignatureVerificationError:
-        print("❌ Invalid signature in webhook")
+    except stripe.error.SignatureVerificationError as e:
         return JsonResponse({'error': 'Invalid signature'}, status=400)
     
-    print(f"🔍 Webhook event received: {event['type']}")
-    
+    # Handle payment_intent.succeeded event
     if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        order_number = session['metadata']['order_number']
-        print(f"🔍 Processing payment for order: {order_number}")
+      session = event['data']['object']
+      order_number = session['metadata']['order_number']
+    
+      try:
+         order = Order.objects.get(order_number=order_number, is_ordered=False)
         
-        try:
-            order = Order.objects.get(order_number=order_number, is_ordered=False)
+         payment = Payment(
+            user = order.user,
+            payment_id = session['payment_intent'],
+            payment_method = 'Stripe',
+            amount_paid = session['amount_total'] / 100,
+            status = 'COMPLETED',
+         )
+         payment.save()
+        
+         order.payment = payment
+         order.is_ordered = True
+         order.save()
+        
+         cart_items = CartItem.objects.filter(user=order.user)
+         for item in cart_items:
+            orderproduct = OrderProduct()
+            orderproduct.order_id = order.id
+            orderproduct.payment = payment
+            orderproduct.user_id = order.user.id
+            orderproduct.product_id = item.product_id
+            orderproduct.quantity = item.quantity
+            orderproduct.product_price = item.product.get_price()
+            orderproduct.ordered = True
+            orderproduct.save()
             
-            payment = Payment(
-                user=order.user,
-                payment_id=session['payment_intent'],
-                payment_method='Stripe',
-                amount_paid=session['amount_total'] / 100,
-                status='COMPLETED',
-            )
-            payment.save()
-            print(f"✅ Payment created for order {order_number}")
+            cart_item = CartItem.objects.get(id=item.id)
+            product_variation = cart_item.variations.all()
+            orderproduct = OrderProduct.objects.get(id=orderproduct.id)
+            orderproduct.variations.set(product_variation)
+            orderproduct.save()
             
-            order.payment = payment
-            order.is_ordered = True
-            order.save()
-            print(f"✅ Order marked as completed: {order_number}")
-            
-            cart_items = CartItem.objects.filter(user=order.user)
-            for item in cart_items:
-                orderproduct = OrderProduct()
-                orderproduct.order_id = order.id
-                orderproduct.payment = payment
-                orderproduct.user_id = order.user.id
-                orderproduct.product_id = item.product_id
-                orderproduct.quantity = item.quantity
-                orderproduct.product_price = item.product.get_price()
-                orderproduct.ordered = True
-                orderproduct.save()
-                
-                cart_item = CartItem.objects.get(id=item.id)
-                product_variation = cart_item.variations.all()
-                orderproduct = OrderProduct.objects.get(id=orderproduct.id)
-                orderproduct.variations.set(product_variation)
-                orderproduct.save()
-                
-                product = Product.objects.get(id=item.product_id)
-                product.stock -= item.quantity
-                product.save()
-            
-            CartItem.objects.filter(user=order.user).delete()
-            print(f"✅ Cart items processed for order {order_number}")
-            
-            # SEND EMAIL VIA RESEND
-            mail_subject = 'Thank you for your order!'
-            message = render_to_string('orders/order_recieved_email.html', {
-                'user': order.user,
-                'order': order,
+            product = Product.objects.get(id=item.product_id)
+            product.stock -= item.quantity
+            product.save()
+         
+         CartItem.objects.filter(user=order.user).delete()
+        
+         mail_subject = 'Thank you for your order!'
+         message = render_to_string('orders/order_recieved_email.html', {
+            'user': order.user,
+            'order': order,
+         })
+         to_email = order.user.email
+         try:
+            if not settings.RESEND_API_KEY:
+                raise ValueError("RESEND_API_KEY not configured")
+
+            if not settings.DEFAULT_FROM_EMAIL:
+                raise ValueError("DEFAULT_FROM_EMAIL not configured")
+
+            response = resend.Emails.send({
+                "from": settings.DEFAULT_FROM_EMAIL,
+                "to": to_email,
+                "subject": mail_subject,
+                "html": message,
             })
-            to_email = order.user.email
-            
-            try:
-                print(f"🔍 DEBUG: Sending order email via Resend (webhook)")
-                print(f"   From: {settings.DEFAULT_FROM_EMAIL}")
-                print(f"   To: {to_email}")
-                
-                response = resend.Emails.send({
-                    "from": settings.DEFAULT_FROM_EMAIL,
-                    "to": to_email,
-                    "subject": mail_subject,
-                    "html": message,
-                })
-                
-                print(f"✅ Resend response: {response}")
-                logger.info(f"Order email sent via Resend to {to_email}")
-                
-            except Exception as e:
-                print(f"❌ Error sending order email: {str(e)}")
-                logger.error(f"Error sending order email: {str(e)}")
+
+            print(f"✅ Stripe order email sent: {response}")
+            logger.info(f"Stripe order email sent to {to_email}")
+
+        except Exception as e:
+            print(f"❌ Error sending stripe email: {e}")
+            logger.error(f"Stripe email error: {e}")
         
-        except Order.DoesNotExist:
-            print(f"❌ Order not found: {order_number}")
-            logger.error(f"Order not found: {order_number}")
+      except Order.DoesNotExist:
+        pass
+    
+    return JsonResponse({'status': 'success'})  
     
     return JsonResponse({'status': 'success'})
