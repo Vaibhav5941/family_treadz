@@ -17,11 +17,65 @@ from .models import Order, Payment, OrderProduct
 from store.models import Product
 from xhtml2pdf import pisa
 
+# Get logger
 logger = logging.getLogger(__name__)
+
+# Initialize Resend
 resend.api_key = settings.RESEND_API_KEY
 
 
+def send_order_confirmation_email(user, order):
+    """
+    ✅ SEND ORDER CONFIRMATION EMAIL VIA RESEND WITH PROPER ERROR HANDLING
+    """
+    try:
+        # Check if API key exists
+        if not settings.RESEND_API_KEY:
+            logger.error("RESEND_API_KEY is not set in environment variables")
+            raise ValueError("RESEND_API_KEY not configured")
+        
+        # Check if DEFAULT_FROM_EMAIL exists
+        if not settings.DEFAULT_FROM_EMAIL:
+            logger.error("DEFAULT_FROM_EMAIL is not set")
+            raise ValueError("DEFAULT_FROM_EMAIL not configured")
+        
+        mail_subject = 'Thank you for your order!'
+        message = render_to_string('orders/order_recieved_email.html', {
+            'user': user,
+            'order': order,
+        })
+        
+        print(f"🔍 DEBUG: Sending order confirmation email with Resend")
+        print(f"   From: {settings.DEFAULT_FROM_EMAIL}")
+        print(f"   To: {user.email}")
+        print(f"   Subject: {mail_subject}")
+        print(f"   API Key exists: {bool(settings.RESEND_API_KEY)}")
+        
+        # Send email via Resend
+        response = resend.Emails.send({
+            "from": settings.DEFAULT_FROM_EMAIL,
+            "to": user.email,
+            "subject": mail_subject,
+            "html": message,
+        })
+        
+        print(f"✅ Resend response: {response}")
+        logger.info(f"Order confirmation email sent to {user.email}")
+        return True
+        
+    except Exception as e:
+        error_msg = f"Error sending order confirmation email to {user.email}: {str(e)}"
+        print(f"❌ {error_msg}")
+        logger.error(error_msg)
+        logger.error(f"Exception type: {type(e).__name__}")
+        logger.error(f"Exception: {e}")
+        return False
+
+
 def payments(request):
+    """
+    ✅ UPDATED: Now uses Resend API for email sending
+    """
     body = json.loads(request.body)
     order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
 
@@ -63,32 +117,11 @@ def payments(request):
 
     CartItem.objects.filter(user=request.user).delete()
 
-    mail_subject = 'Thank you for your order!'
-    message = render_to_string('orders/order_recieved_email.html', {
-        'user': request.user,
-        'order': order,
-    })
-    to_email = request.user.email
-    try:
-      if not settings.RESEND_API_KEY:
-          raise ValueError("RESEND_API_KEY not configured")
-
-      if not settings.DEFAULT_FROM_EMAIL:
-          raise ValueError("DEFAULT_FROM_EMAIL not configured")
-
-      response = resend.Emails.send({
-          "from": settings.DEFAULT_FROM_EMAIL,
-          "to": to_email,
-          "subject": mail_subject,
-          "html": message,
-      })
-
-      print(f"✅ Order email sent: {response}")
-      logger.info(f"Order email sent to {to_email}")
-
-    except Exception as e:
-      print(f"❌ Error sending order email: {e}")
-      logger.error(f"Order email error: {e}")
+    # ✅ SEND ORDER CONFIRMATION EMAIL VIA RESEND
+    email_sent = send_order_confirmation_email(request.user, order)
+    
+    if not email_sent:
+        logger.warning(f"Failed to send order confirmation email for order {order.order_number}")
 
     data = {
         'order_number': order.order_number,
@@ -97,26 +130,27 @@ def payments(request):
     return JsonResponse(data)
 
 
-def place_order(request, total=0, quantity=0):
+def place_order(request, total=0, quantity=0,):
     current_user = request.user
+
+    # If the cart count is less than or equal to 0, then redirect back to shop
     cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
-    
     if cart_count <= 0:
         return redirect('store')
-    
+
     grand_total = 0
     tax = 0
     for cart_item in cart_items:
         total += (cart_item.product.get_price() * cart_item.quantity)
         quantity += cart_item.quantity
-    
-    tax = (2 * total) / 100
+    tax = (2 * total)/100
     grand_total = total + tax
-    
+
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
+            # Store all the billing information inside Order table
             data = Order()
             data.user = current_user
             data.first_name = form.cleaned_data['first_name']
@@ -133,16 +167,16 @@ def place_order(request, total=0, quantity=0):
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
-            
+            # Generate order number
             yr = int(datetime.date.today().strftime('%Y'))
             dt = int(datetime.date.today().strftime('%d'))
             mt = int(datetime.date.today().strftime('%m'))
-            d = datetime.date(yr, mt, dt)
-            current_date = d.strftime("%Y%m%d")
+            d = datetime.date(yr,mt,dt)
+            current_date = d.strftime("%Y%m%d") #20210305
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
-            
+
             order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
             context = {
                 'order': order,
@@ -154,26 +188,28 @@ def place_order(request, total=0, quantity=0):
             }
             return render(request, 'orders/payments.html', context)
         else:
+         # Form is invalid, redirect back to checkout with error
             messages.error(request, 'Please fill in all required fields correctly.')
             return redirect('checkout')
     else:
+        # GET request - redirect to checkout
         return redirect('checkout')
 
 
 def order_complete(request):
     order_number = request.GET.get('order_number')
     session_id = request.GET.get('session_id')
-    
+
     try:
         order = Order.objects.get(order_number=order_number, is_ordered=True)
         ordered_products = OrderProduct.objects.filter(order_id=order.id)
-        
+
         subtotal = 0
         for i in ordered_products:
             subtotal += i.product_price * i.quantity
-        
+
         payment = Payment.objects.get(id=order.payment.id)
-        
+
         context = {
             'order': order,
             'ordered_products': ordered_products,
@@ -189,9 +225,12 @@ def order_complete(request):
 
 @login_required(login_url='login')
 def track_order(request):
+    # Get all orders for the current user
     orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    
     order_data = []
     
+    # Determine status color and progress
     status_colors = {
         'New': '#FFC107',
         'Accepted': '#17A2B8',
@@ -208,6 +247,7 @@ def track_order(request):
     
     for order in orders:
         ordered_products = OrderProduct.objects.filter(order_id=order.id)
+        
         subtotal = 0
         for i in ordered_products:
             subtotal += i.product_price * i.quantity
@@ -238,6 +278,7 @@ def create_checkout_session(request):
     try:
         data = json.loads(request.body)
         order_number = data.get('order_number')
+        
         order = Order.objects.get(user=request.user, is_ordered=False, order_number=order_number)
         
         stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -262,91 +303,80 @@ def create_checkout_session(request):
         
         return JsonResponse({'sessionId': session.id})
     except Exception as e:
-        print(f"❌ Error creating checkout session: {str(e)}")
-        logger.error(f"Error creating checkout session: {str(e)}")
         return JsonResponse({'error': str(e)}, status=400)
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def stripe_webhook(request):
+    """
+    ✅ UPDATED: Now uses Resend API for email sending
+    """
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-
+    
     try:
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except ValueError:
+    except ValueError as e:
         return JsonResponse({'error': 'Invalid payload'}, status=400)
-    except stripe.error.SignatureVerificationError:
+    except stripe.error.SignatureVerificationError as e:
         return JsonResponse({'error': 'Invalid signature'}, status=400)
-
+    
+    # Handle payment_intent.succeeded event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         order_number = session['metadata']['order_number']
-
+    
         try:
             order = Order.objects.get(order_number=order_number, is_ordered=False)
-
+            
             payment = Payment(
-                user=order.user,
-                payment_id=session['payment_intent'],
-                payment_method='Stripe',
-                amount_paid=session['amount_total'] / 100,
-                status='COMPLETED',
+                user = order.user,
+                payment_id = session['payment_intent'],
+                payment_method = 'Stripe',
+                amount_paid = session['amount_total'] / 100,
+                status = 'COMPLETED',
             )
             payment.save()
-
+            
             order.payment = payment
             order.is_ordered = True
             order.save()
-
+            
             cart_items = CartItem.objects.filter(user=order.user)
-
             for item in cart_items:
-                orderproduct = OrderProduct.objects.create(
-                    order_id=order.id,
-                    payment=payment,
-                    user_id=order.user.id,
-                    product_id=item.product_id,
-                    quantity=item.quantity,
-                    product_price=item.product.get_price(),
-                    ordered=True
-                )
-
-                orderproduct.variations.set(item.variations.all())
-
+                orderproduct = OrderProduct()
+                orderproduct.order_id = order.id
+                orderproduct.payment = payment
+                orderproduct.user_id = order.user.id
+                orderproduct.product_id = item.product_id
+                orderproduct.quantity = item.quantity
+                orderproduct.product_price = item.product.get_price()
+                orderproduct.ordered = True
+                orderproduct.save()
+                
+                cart_item = CartItem.objects.get(id=item.id)
+                product_variation = cart_item.variations.all()
+                orderproduct = OrderProduct.objects.get(id=orderproduct.id)
+                orderproduct.variations.set(product_variation)
+                orderproduct.save()
+                
                 product = Product.objects.get(id=item.product_id)
                 product.stock -= item.quantity
                 product.save()
-
+            
             CartItem.objects.filter(user=order.user).delete()
-
-            # ✅ EMAIL VIA RESEND
-            mail_subject = 'Thank you for your order!'
-            message = render_to_string('orders/order_recieved_email.html', {
-                'user': order.user,
-                'order': order,
-            })
-            to_email = order.user.email
-
-            try:
-                response = resend.Emails.send({
-                    "from": settings.DEFAULT_FROM_EMAIL,
-                    "to": to_email,
-                    "subject": mail_subject,
-                    "html": message,
-                })
-
-                print(f"✅ Stripe email sent: {response}")
-                logger.info(f"Stripe email sent to {to_email}")
-
-            except Exception as e:
-                print(f"❌ Email error: {e}")
-                logger.error(f"Stripe email error: {e}")
-
+            
+            # ✅ SEND ORDER CONFIRMATION EMAIL VIA RESEND
+            email_sent = send_order_confirmation_email(order.user, order)
+            
+            if not email_sent:
+                logger.warning(f"Failed to send order confirmation email for order {order.order_number}")
+            
         except Order.DoesNotExist:
+            logger.error(f"Order not found for order_number: {order_number}")
             pass
-
+    
     return JsonResponse({'status': 'success'})
