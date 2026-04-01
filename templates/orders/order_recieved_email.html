@@ -165,7 +165,7 @@
         </div>
         
         <div class="email-body">
-            <div class="greeting">Hi <strong>{{user.first_name}}</strong>,</div>
+            <div class="greeting">Hi <strong>{{ user.first_name }}</strong>,</div>
             
             <p class="intro-text">
                 Great news! We've received your order and payment successfully.<br>
@@ -176,19 +176,19 @@
                 <h2>📦 Your Order Details</h2>
                 <div class="order-detail">
                     <strong>Order Number:</strong> 
-                    <span class="highlight">#{{order.order_number}}</span>
+                    <span class="highlight">#{{ order.order_number }}</span>
                 </div>
                 <div class="order-detail">
                     <strong>Order Date:</strong> 
-                    <span>{{order.created_at|date:"d F Y"}}</span>
+                    <span>{{ order.created_at|date:"d F Y" }}</span>
                 </div>
                 <div class="order-detail">
                     <strong>Order Time:</strong> 
-                    <span>{{order.created_at|date:"h:i A"}} IST</span>
+                    <span>{{ order.created_at|date:"h:i A" }} IST</span>
                 </div>
                 <div class="order-detail">
                     <strong>Total Amount:</strong> 
-                    <span class="highlight" style="font-size: 16px;">₹{{order.order_total}}</span>
+                    <span class="highlight" style="font-size: 16px;">₹{{ order.order_total }}</span>
                 </div>
                 <div class="order-detail">
                     <strong>Payment Status:</strong> 
@@ -201,7 +201,7 @@
             </div>
             
             <div class="button-container">
-                <a href="http://127.0.0.1:8000/orders/download-invoice/{{order.id}}/" class="download-btn">
+                <a href="https://family-trendz.onrender.com/accounts/download-order-invoice/{{ order.id }}/" class="download-btn">
                     📄 Download Invoice PDF
                 </a>
             </div>
