@@ -1,9 +1,10 @@
 import stripe
 import json
 import datetime
+import resend
+import logging
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
-from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,6 +16,12 @@ from .forms import OrderForm
 from .models import Order, Payment, OrderProduct
 from store.models import Product
 from xhtml2pdf import pisa
+
+# Get logger
+logger = logging.getLogger(__name__)
+ 
+# Initialize Resend
+resend.api_key = settings.RESEND_API_KEY
 # def payments(request):
 #     body = json.loads(request.body)
 #     order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
@@ -126,9 +133,25 @@ def payments(request):
         'order': order,
     })
     to_email = request.user.email
-    send_email = EmailMessage(mail_subject, message, to=[to_email])
-    send_email.content_subtype = 'html'
-    send_email.send()
+    try:
+        print(f"🔍 DEBUG: Sending order email via Resend (payments)")
+        print(f"   From: {settings.DEFAULT_FROM_EMAIL}")
+        print(f"   To: {to_email}")
+        
+        # RESEND API - Instead of EmailMessage.send()
+        response = resend.Emails.send({
+            "from": settings.DEFAULT_FROM_EMAIL,
+            "to": to_email,
+            "subject": mail_subject,
+            "html": message,
+        })
+        
+        print(f"✅ Resend response: {response}")
+        logger.info(f"Order email sent via Resend to {to_email}")
+        
+    except Exception as e:
+        print(f"❌ Error sending order email: {str(e)}")
+        logger.error(f"Error sending order email: {str(e)}")
 
     data = {
         'order_number': order.order_number,
@@ -464,9 +487,25 @@ def stripe_webhook(request):
             'order': order,
          })
          to_email = order.user.email
-         send_email = EmailMessage(mail_subject, message, to=[to_email])
-         send_email.content_subtype = 'html'
-         send_email.send()
+         try:
+                print(f"🔍 DEBUG: Sending order email via Resend (webhook)")
+                print(f"   From: {settings.DEFAULT_FROM_EMAIL}")
+                print(f"   To: {to_email}")
+                
+                # RESEND API - Instead of EmailMessage.send()
+                response = resend.Emails.send({
+                    "from": settings.DEFAULT_FROM_EMAIL,
+                    "to": to_email,
+                    "subject": mail_subject,
+                    "html": message,
+                })
+                
+                print(f"✅ Resend response: {response}")
+                logger.info(f"Order email sent via Resend to {to_email}")
+                
+            except Exception as e:
+                print(f"❌ Error sending order email: {str(e)}")
+                logger.error(f"Error sending order email: {str(e)}")
         
       except Order.DoesNotExist:
         pass
