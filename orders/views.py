@@ -86,9 +86,14 @@ resend.api_key = settings.RESEND_API_KEY
 #     }
 #     return JsonResponse(data)
 def payments(request):
+    """
+    PAYMENTS FUNCTIONALITY: Same as before
+    ONLY EMAIL CHANGED: Now uses Resend instead of EmailMessage
+    """
     body = json.loads(request.body)
     order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-
+    
+    # Payment creation - SAME functionality
     payment = Payment(
         user = request.user,
         payment_id = body['transID'],
@@ -97,13 +102,14 @@ def payments(request):
         status = body['status'],
     )
     payment.save()
-
+    
+    # Order update - SAME functionality
     order.payment = payment
     order.is_ordered = True
     order.save()
-
+    
+    # Cart items processing - SAME functionality
     cart_items = CartItem.objects.filter(user=request.user)
-
     for item in cart_items:
         orderproduct = OrderProduct()
         orderproduct.order_id = order.id
@@ -114,25 +120,28 @@ def payments(request):
         orderproduct.product_price = item.product.get_price()
         orderproduct.ordered = True
         orderproduct.save()
-
+        
         cart_item = CartItem.objects.get(id=item.id)
         product_variation = cart_item.variations.all()
         orderproduct = OrderProduct.objects.get(id=orderproduct.id)
         orderproduct.variations.set(product_variation)
         orderproduct.save()
-
+        
         product = Product.objects.get(id=item.product_id)
         product.stock -= item.quantity
         product.save()
-
+    
+    # Clear cart - SAME functionality
     CartItem.objects.filter(user=request.user).delete()
-
+    
+    # ✅ ONLY THIS PART CHANGED: EMAIL NOW USES RESEND
     mail_subject = 'Thank you for your order!'
     message = render_to_string('orders/order_recieved_email.html', {
         'user': request.user,
         'order': order,
     })
     to_email = request.user.email
+    
     try:
         print(f"🔍 DEBUG: Sending order email via Resend (payments)")
         print(f"   From: {settings.DEFAULT_FROM_EMAIL}")
@@ -152,13 +161,13 @@ def payments(request):
     except Exception as e:
         print(f"❌ Error sending order email: {str(e)}")
         logger.error(f"Error sending order email: {str(e)}")
-
+    
+    # Return data - SAME functionality
     data = {
         'order_number': order.order_number,
         'transID': payment.payment_id,
     }
     return JsonResponse(data)
-
 
 def place_order(request, total=0, quantity=0,):
     current_user = request.user
@@ -424,6 +433,10 @@ def create_checkout_session(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def stripe_webhook(request):
+    """
+    WEBHOOK FUNCTIONALITY: Same as before
+    ONLY EMAIL CHANGED: Now uses Resend instead of EmailMessage
+    """
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     
@@ -438,56 +451,62 @@ def stripe_webhook(request):
     
     # Handle payment_intent.succeeded event
     if event['type'] == 'checkout.session.completed':
-      session = event['data']['object']
-      order_number = session['metadata']['order_number']
-    
-      try:
-         order = Order.objects.get(order_number=order_number, is_ordered=False)
+        session = event['data']['object']
+        order_number = session['metadata']['order_number']
         
-         payment = Payment(
-            user = order.user,
-            payment_id = session['payment_intent'],
-            payment_method = 'Stripe',
-            amount_paid = session['amount_total'] / 100,
-            status = 'COMPLETED',
-         )
-         payment.save()
-        
-         order.payment = payment
-         order.is_ordered = True
-         order.save()
-        
-         cart_items = CartItem.objects.filter(user=order.user)
-         for item in cart_items:
-            orderproduct = OrderProduct()
-            orderproduct.order_id = order.id
-            orderproduct.payment = payment
-            orderproduct.user_id = order.user.id
-            orderproduct.product_id = item.product_id
-            orderproduct.quantity = item.quantity
-            orderproduct.product_price = item.product.get_price()
-            orderproduct.ordered = True
-            orderproduct.save()
+        try:
+            order = Order.objects.get(order_number=order_number, is_ordered=False)
             
-            cart_item = CartItem.objects.get(id=item.id)
-            product_variation = cart_item.variations.all()
-            orderproduct = OrderProduct.objects.get(id=orderproduct.id)
-            orderproduct.variations.set(product_variation)
-            orderproduct.save()
+            # Payment creation - SAME functionality
+            payment = Payment(
+                user = order.user,
+                payment_id = session['payment_intent'],
+                payment_method = 'Stripe',
+                amount_paid = session['amount_total'] / 100,
+                status = 'COMPLETED',
+            )
+            payment.save()
             
-            product = Product.objects.get(id=item.product_id)
-            product.stock -= item.quantity
-            product.save()
-         
-         CartItem.objects.filter(user=order.user).delete()
-        
-         mail_subject = 'Thank you for your order!'
-         message = render_to_string('orders/order_recieved_email.html', {
-            'user': order.user,
-            'order': order,
-         })
-         to_email = order.user.email
-         try:
+            # Order update - SAME functionality
+            order.payment = payment
+            order.is_ordered = True
+            order.save()
+            
+            # Cart items processing - SAME functionality
+            cart_items = CartItem.objects.filter(user=order.user)
+            for item in cart_items:
+                orderproduct = OrderProduct()
+                orderproduct.order_id = order.id
+                orderproduct.payment = payment
+                orderproduct.user_id = order.user.id
+                orderproduct.product_id = item.product_id
+                orderproduct.quantity = item.quantity
+                orderproduct.product_price = item.product.get_price()
+                orderproduct.ordered = True
+                orderproduct.save()
+                
+                cart_item = CartItem.objects.get(id=item.id)
+                product_variation = cart_item.variations.all()
+                orderproduct = OrderProduct.objects.get(id=orderproduct.id)
+                orderproduct.variations.set(product_variation)
+                orderproduct.save()
+                
+                product = Product.objects.get(id=item.product_id)
+                product.stock -= item.quantity
+                product.save()
+            
+            # Clear cart - SAME functionality
+            CartItem.objects.filter(user=order.user).delete()
+            
+            # ✅ ONLY THIS PART CHANGED: EMAIL NOW USES RESEND
+            mail_subject = 'Thank you for your order!'
+            message = render_to_string('orders/order_recieved_email.html', {
+                'user': order.user,
+                'order': order,
+            })
+            to_email = order.user.email
+            
+            try:
                 print(f"🔍 DEBUG: Sending order email via Resend (webhook)")
                 print(f"   From: {settings.DEFAULT_FROM_EMAIL}")
                 print(f"   To: {to_email}")
@@ -506,9 +525,10 @@ def stripe_webhook(request):
             except Exception as e:
                 print(f"❌ Error sending order email: {str(e)}")
                 logger.error(f"Error sending order email: {str(e)}")
-        
-      except Order.DoesNotExist:
-        pass
+            
+        except Order.DoesNotExist:
+            print(f"❌ Order not found: {order_number}")
+            logger.error(f"Order not found: {order_number}")
     
-    return JsonResponse({'status': 'success'})    
+    return JsonResponse({'status': 'success'})
 
