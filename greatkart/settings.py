@@ -198,9 +198,7 @@ MESSAGE_TAGS = {
 # Using Resend API
 
 RESEND_API_KEY = config('RESEND_API_KEY', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='gvaibhav5941@gmail.com')
-
-# Django EMAIL_BACKEND (not used, but keep for compatibility)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@familytrendz.in')
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.locmem.EmailBackend'
 
 # ==============================================================
