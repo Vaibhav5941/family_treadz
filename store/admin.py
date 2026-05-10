@@ -37,6 +37,7 @@ class ProductGalleryInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
+        'product_id',
         'product_name',
         'price',
         'offer_price',
@@ -45,7 +46,7 @@ class ProductAdmin(admin.ModelAdmin):
         'modified_date',
         'is_available'
     )
-    search_fields = ('^product_name', '=id',"=price","=stock")
+    search_fields = ('product_id','^product_name', '=id',"=price","=stock")
     list_filter = ('category', 'is_available')
     list_per_page = 25
     prepopulated_fields = {'slug': ('product_name',)}
